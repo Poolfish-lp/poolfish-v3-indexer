@@ -1,13 +1,25 @@
 name: Poolfish indexer
 description: An indexer to index multiple networks and multiple contracts from pools tracked on Poolfish
+contracts:
+  - name: UniV3Factory
+    handler: src/EventHandlers.ts
+    events:
+      - event: "event OwnerChanged(address indexed oldOwner, address indexed newOwner)"
+        requiredEntities:
+          - name: "Factory"
 networks:
+  - id: 1 # Ethereum
+    start_block: 16955547 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F
+    contracts:
+      - name: UniV3Factory
+        address: "0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F"
   - id: 137 # Polygon
     start_block: 41024971 # The deployment block https://polygonscan.com/address/0x917933899c6a5F8E37F31E19f92CdBFF7e8FF0e2
     contracts:
       - name: UniV3Factory
         address: "0x917933899c6a5F8E37F31E19f92CdBFF7e8FF0e2"
-        handler: src/EventHandlers.ts
-        events:
-          - event: "event OwnerChanged(address indexed oldOwner, address indexed newOwner)"
-            requiredEntities:
-              - name: "Factory"
+  - id: 100 # Gnosis
+    start_block: 27232871 # The deployment block https://gnosisscan.io/address/0xf78031CBCA409F2FB6876BDFDBc1b2df24cF9bEf
+    contracts:
+      - name: UniV3Factory
+        address: "0xf78031CBCA409F2FB6876BDFDBc1b2df24cF9bEf"
