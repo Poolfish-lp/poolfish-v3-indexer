@@ -5,9 +5,8 @@ type Factory @entity {
   id: ID!
   # current owner of the factory
   owner: Bytes!
-
-  # # amount of pools created
-  # poolCount: BigInt!
+  # amount of pools created
+  poolCount: BigInt!
   # # amoutn of transactions all time
   # txCount: BigInt!
   # # total volume all time in derived USD

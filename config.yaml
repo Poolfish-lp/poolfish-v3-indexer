@@ -7,6 +7,9 @@ contracts:
       - event: "event OwnerChanged(address indexed oldOwner, address indexed newOwner)"
         requiredEntities:
           - name: "Factory"
+      - event: "event PoolCreated(address indexed token0, address indexed token1, uint24 indexed fee, int24 tickSpacing, address pool)"
+        requiredEntities:
+          - name: "Factory"
 networks:
   - id: 1 # Ethereum
     start_block: 16955547 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F
