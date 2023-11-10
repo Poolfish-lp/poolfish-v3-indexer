@@ -17,10 +17,12 @@ contracts:
         requiredEntities: []
 networks:
   - id: 1 # Ethereum
-    start_block: 16955547 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F
+    start_block: 16950686 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F
     contracts:
       - name: UniV3Factory
-        address: "0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F"
+        address:
+          - "0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F" # uniswap
+          - "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865" # pancakeswap
       - name: Pool
         address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
   - id: 137 # Polygon
@@ -35,5 +37,14 @@ networks:
     contracts:
       - name: UniV3Factory
         address: "0xf78031CBCA409F2FB6876BDFDBc1b2df24cF9bEf"
+      - name: Pool
+        address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
+  - id: 56 # BSC
+    start_block: 26956207 # The deployment block https://bscscan.com/txs?a=0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865
+    contracts:
+      - name: UniV3Factory
+        address:
+          - "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7" # uniswap
+          - "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865" # pancakeswap
       - name: Pool
         address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
