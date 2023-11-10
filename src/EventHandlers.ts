@@ -15,6 +15,7 @@ import {
 } from "../generated/src/Handlers.gen";
 
 import { FactoryEntity, PoolEntity } from "../generated/src/Types.gen";
+import { addressToDex } from "./utils/addressToDex";
 
 // event OwnerChanged(address indexed oldOwner, address indexed newOwner)
 UniV3FactoryContract_OwnerChanged_loader(({ event, context }) => {
@@ -31,6 +32,7 @@ UniV3FactoryContract_OwnerChanged_handler(({ event, context }) => {
     id: factoryAddress,
     owner: newFactoryOwner,
     poolCount: 0n,
+    dexKey: addressToDex(event.srcAddress),
   };
 
   context.Factory.set(factoryObject);
@@ -74,6 +76,7 @@ PoolContract_Initialize_handler(({ event, context }) => {
     createdAtTimestamp: event.blockTimestamp, // can see this list of available properties here https://docs.envio.dev/docs/event-handlers
     sqrtPrice: sqrtPrice,
     tick: tick,
+    // dexKey: addressToDex(event.srcAddress),
   };
 
   context.Pool.set(poolObject);

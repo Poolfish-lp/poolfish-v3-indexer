@@ -3,6 +3,8 @@
 type Factory {
   # factory address
   id: ID!
+  # the dex this is on
+  dexKey: String!
   # current owner of the factory
   owner: Bytes!
   # amount of pools created
@@ -32,6 +34,8 @@ type Factory {
 type Pool @entity {
   # pool address
   id: ID!
+  # the dex this is on
+  # dexKey: String! //TODO: add this
   # creation
   createdAtTimestamp: Int!
   # # block pool was created at

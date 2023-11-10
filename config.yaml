@@ -17,7 +17,7 @@ contracts:
         requiredEntities: []
 networks:
   - id: 1 # Ethereum
-    start_block: 16950686 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F
+    start_block: 16955547 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F one from pancakeswap: 16950686
     contracts:
       - name: UniV3Factory
         address:
