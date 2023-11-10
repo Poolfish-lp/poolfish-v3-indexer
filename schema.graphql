@@ -1,36 +1,31 @@
-type Greeting {
-  id: ID!
-  greetings: [String!]!
-  latestGreeting: String!
-  numberOfGreetings: Int!
-}
+# Can read more on the schema here: https://docs.envio.dev/docs/schema
 
 type Factory @entity {
   # factory address
   id: ID!
-  # amount of pools created
-  poolCount: BigInt!
-  # amoutn of transactions all time
-  txCount: BigInt!
-  # total volume all time in derived USD
-  totalVolumeUSD: BigDecimal!
-  # total volume all time in derived ETH
-  totalVolumeETH: BigDecimal!
-  # total swap fees all time in USD
-  totalFeesUSD: BigDecimal!
-  # total swap fees all time in USD
-  totalFeesETH: BigDecimal!
-  # all volume even through less reliable USD values
-  untrackedVolumeUSD: BigDecimal!
-  # TVL derived in USD
-  totalValueLockedUSD: BigDecimal!
-  # TVL derived in ETH
-  totalValueLockedETH: BigDecimal!
-  # TVL derived in USD untracked
-  totalValueLockedUSDUntracked: BigDecimal!
-  # TVL derived in ETH untracked
-  totalValueLockedETHUntracked: BigDecimal!
-
   # current owner of the factory
-  owner: ID!
+  owner: Bytes!
+
+  # # amount of pools created
+  # poolCount: BigInt!
+  # # amoutn of transactions all time
+  # txCount: BigInt!
+  # # total volume all time in derived USD
+  # totalVolumeUSD: Float!
+  # # total volume all time in derived ETH
+  # totalVolumeETH: Float!
+  # # total swap fees all time in USD
+  # totalFeesUSD: Float!
+  # # total swap fees all time in USD
+  # totalFeesETH: Float!
+  # # all volume even through less reliable USD values
+  # untrackedVolumeUSD: Float!
+  # # TVL derived in USD
+  # totalValueLockedUSD: Float!
+  # # TVL derived in ETH
+  # totalValueLockedETH: Float!
+  # # TVL derived in USD untracked
+  # totalValueLockedUSDUntracked: Float!
+  # # TVL derived in ETH untracked
+  # totalValueLockedETHUntracked: Float!
 }
