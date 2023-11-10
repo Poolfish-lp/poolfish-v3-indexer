@@ -6,16 +6,16 @@
   */
 
 import {
-  PoolContract_Initialize_loader,
-  PoolContract_Initialize_handler,
+  UniPoolContract_Initialize_loader,
+  UniPoolContract_Initialize_handler,
 } from "./src/Handlers.gen";
 
 import { PoolEntity } from "./src/Types.gen";
 
 // event Initialize(uint160 sqrtPriceX96, int24 tick)
-PoolContract_Initialize_loader(({ event, context }) => {}); // don't need a loader for this event as no entities will be updated in the handler
+UniPoolContract_Initialize_loader(({ event, context }) => {}); // don't need a loader for this event as no entities will be updated in the handler
 
-PoolContract_Initialize_handler(({ event, context }) => {
+UniPoolContract_Initialize_handler(({ event, context }) => {
   let tick = event.params.tick;
   let sqrtPrice = event.params.sqrtPriceX96;
 

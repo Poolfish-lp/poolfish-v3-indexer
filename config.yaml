@@ -10,30 +10,59 @@ contracts:
       - event: "event PoolCreated(address indexed token0, address indexed token1, uint24 indexed fee, int24 tickSpacing, address pool)"
         requiredEntities:
           - name: "Factory"
-  - name: Pool
+  - name: UniPool
+    handler: src/PoolEventHandlers.ts
+    events:
+      - event: "event Initialize(uint160 sqrtPriceX96, int24 tick)"
+        requiredEntities: []
+  - name: PancakeV3Factory
+    handler: src/FactoryEventHandlers.ts
+    events:
+      - event: "event OwnerChanged(address indexed oldOwner, address indexed newOwner)"
+        requiredEntities:
+          - name: "Factory"
+      - event: "event PoolCreated(address indexed token0, address indexed token1, uint24 indexed fee, int24 tickSpacing, address pool)"
+        requiredEntities:
+          - name: "Factory"
+  - name: PancakePool
     handler: src/PoolEventHandlers.ts
     events:
       - event: "event Initialize(uint160 sqrtPriceX96, int24 tick)"
         requiredEntities: []
 networks:
   - id: 1 # Ethereum
-    start_block: 16955547 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F
+    start_block: 16950686 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F take first block from the different dexes
     contracts:
       - name: UniV3Factory
         address: "0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F"
-      - name: Pool
+      - name: UniPool
+        address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
+      - name: PancakeV3Factory
+        address: "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865"
+      - name: PancakePool
         address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
   - id: 137 # Polygon
     start_block: 41024971 # The deployment block https://polygonscan.com/address/0x917933899c6a5F8E37F31E19f92CdBFF7e8FF0e2
     contracts:
       - name: UniV3Factory
         address: "0x917933899c6a5F8E37F31E19f92CdBFF7e8FF0e2"
-      - name: Pool
+      - name: UniPool
         address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
   - id: 100 # Gnosis
     start_block: 27232871 # The deployment block https://gnosisscan.io/address/0xf78031CBCA409F2FB6876BDFDBc1b2df24cF9bEf
     contracts:
       - name: UniV3Factory
         address: "0xf78031CBCA409F2FB6876BDFDBc1b2df24cF9bEf"
-      - name: Pool
+      - name: UniPool
+        address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
+  - id: 56 # BSC
+    start_block: 26956207 # The deployment block https://bscscan.com/txs?a=0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865
+    contracts:
+      - name: UniV3Factory
+        address: "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7"
+      - name: UniPool
+        address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
+      - name: PancakeV3Factory
+        address: "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865"
+      - name: PancakePool
         address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
