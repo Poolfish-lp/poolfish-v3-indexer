@@ -5,4 +5,5 @@
 ### Notes
 
 - https://docs.sushi.com/docs/Developers/Deployment%20Addresses
-- v3 Factory addresses https://docs.sushi.com/docs/Products/V3%20AMM/Core/Deployment%20Addresses
+- v3 Factory addresses https://docs.sushi.com/docs/Products/V3%20AMM/Core/Deployment%20Addressesa
+- v3 Pool https://github.com/sushiswap/v3-core/blob/master/contracts/interfaces/pool/IUniswapV3PoolEvents.sol
