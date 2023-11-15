@@ -6,7 +6,8 @@
     "build": "tsc --build",
     "watch": "tsc --watch",
     "codegen": "envio codegen",
-    "start": "ts-node generated/src/Index.bs.js"
+    "start": "ts-node generated/src/Index.bs.js",
+    "generate-json": "node ./scripts/poolsToJSON.js"
   },
   "devDependencies": {
     "@types/node": "20.8.8",
