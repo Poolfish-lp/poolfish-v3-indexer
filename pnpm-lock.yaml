@@ -89,6 +89,70 @@ importers:
         specifier: 10.1.4
         version: 10.1.4
 
+  generated-blah:
+    dependencies:
+      '@elastic/ecs-pino-format':
+        specifier: 1.4.0
+        version: 1.4.0
+      '@glennsl/rescript-fetch':
+        specifier: 0.2.0
+        version: 0.2.0
+      '@ryyppy/rescript-promise':
+        specifier: 2.1.0
+        version: 2.1.0
+      ethers:
+        specifier: 6.8.0
+        version: 6.8.0
+      express:
+        specifier: 4.18.2
+        version: 4.18.2
+      js-sdsl:
+        specifier: 4.4.2
+        version: 4.4.2
+      node-fetch:
+        specifier: 2.7.0
+        version: 2.7.0
+      pino:
+        specifier: 8.16.1
+        version: 8.16.1
+      pino-pretty:
+        specifier: 10.2.3
+        version: 10.2.3
+      postgres:
+        specifier: 3.4.1
+        version: 3.4.1
+      prom-client:
+        specifier: 15.0.0
+        version: 15.0.0
+      rescript-envsafe:
+        specifier: 1.3.0
+        version: 1.3.0(rescript-struct@4.1.1)(rescript@10.1.4)
+      rescript-express:
+        specifier: 0.4.1
+        version: 0.4.1(express@4.18.2)
+      rescript-struct:
+        specifier: 4.1.1
+        version: 4.1.1(rescript@10.1.4)
+      skar-client-node:
+        specifier: 0.0.9
+        version: 0.0.9
+      viem:
+        specifier: 1.16.6
+        version: 1.16.6(typescript@5.2.2)
+      yargs:
+        specifier: 17.7.2
+        version: 17.7.2
+    devDependencies:
+      '@greenlabs/ppx-spice':
+        specifier: 0.1.14
+        version: 0.1.14
+      gentype:
+        specifier: 4.5.0
+        version: 4.5.0
+      rescript:
+        specifier: 10.1.4
+        version: 10.1.4
+
 packages:
 
   /@adraffy/ens-normalize@1.10.0:
