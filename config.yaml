@@ -25,20 +25,20 @@ networks:
           - "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865" # pancakeswap
       - name: Pool
         address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
-  - id: 137 # Polygon
-    start_block: 41024971 # The deployment block https://polygonscan.com/address/0x917933899c6a5F8E37F31E19f92CdBFF7e8FF0e2
-    contracts:
-      - name: Factory
-        address: "0x917933899c6a5F8E37F31E19f92CdBFF7e8FF0e2"
-      - name: Pool
-        address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
-  - id: 100 # Gnosis
-    start_block: 27232871 # The deployment block https://gnosisscan.io/address/0xf78031CBCA409F2FB6876BDFDBc1b2df24cF9bEf
-    contracts:
-      - name: Factory
-        address: "0xf78031CBCA409F2FB6876BDFDBc1b2df24cF9bEf"
-      - name: Pool
-        address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
+  # - id: 137 # Polygon
+  #   start_block: 41024971 # The deployment block https://polygonscan.com/address/0x917933899c6a5F8E37F31E19f92CdBFF7e8FF0e2
+  #   contracts:
+  #     - name: Factory
+  #       address: "0x917933899c6a5F8E37F31E19f92CdBFF7e8FF0e2"
+  #     - name: Pool
+  #       address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
+  # - id: 100 # Gnosis
+  #   start_block: 27232871 # The deployment block https://gnosisscan.io/address/0xf78031CBCA409F2FB6876BDFDBc1b2df24cF9bEf
+  #   contracts:
+  #     - name: Factory
+  #       address: "0xf78031CBCA409F2FB6876BDFDBc1b2df24cF9bEf"
+  #     - name: Pool
+  #       address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
   - id: 56 # BSC
     start_block: 26956207 # The deployment block https://bscscan.com/txs?a=0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865
     contracts:

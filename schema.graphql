@@ -35,7 +35,7 @@ type Pool @entity {
   # pool address
   id: ID!
   # the dex this is on
-  # dexKey: String! //TODO: add this
+  dexKey: String
   # creation
   createdAtTimestamp: Int!
   # # block pool was created at
