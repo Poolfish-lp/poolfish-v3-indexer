@@ -13,6 +13,7 @@ import {
 } from "../generated/src/Handlers.gen";
 
 import { FactoryEntity, PoolEntity } from "../generated/src/Types.gen";
+import { ZERO_BD, ZERO_BI } from "./constants";
 import { addressToDex } from "./utils/addressToDex";
 import { getPoolAddressToDex } from "./utils/getPoolAddressToDex";
 
@@ -52,16 +53,43 @@ PoolContract_Initialize_handler(({ event, context }) => {
   let tick = event.params.tick;
   let sqrtPrice = event.params.sqrtPriceX96;
 
-  if (!getPoolAddressToDex(event.srcAddress)) {
+  const dexKey = getPoolAddressToDex(event.srcAddress);
+  if (!dexKey) {
     return null;
   }
 
   let poolObject: PoolEntity = {
     id: event.srcAddress,
-    createdAtTimestamp: event.blockTimestamp, // can see this list of available properties here https://docs.envio.dev/docs/event-handlers
-    sqrtPrice: sqrtPrice,
+    createdAtTimestamp: BigInt(event.blockTimestamp), // can see this list of available properties here https://docs.envio.dev/docs/event-handlers
     tick: tick,
-    dexKey: getPoolAddressToDex(event.srcAddress),
+    dexKey: dexKey,
+    //   token0: token0.id,
+    // token1: token1.id,
+    feeTier: ZERO_BI, //BigInt(event.params.tick), //BigInt.fromI32(event.params.fee),
+    createdAtBlockNumber: BigInt(event.blockNumber),
+    liquidityProviderCount: ZERO_BI,
+    txCount: ZERO_BI,
+    sqrtPrice: sqrtPrice,
+    liquidity: ZERO_BI,
+    feeGrowthGlobal0X128: ZERO_BI,
+    feeGrowthGlobal1X128: ZERO_BI,
+    token0Price: ZERO_BD,
+    token1Price: ZERO_BD,
+    observationIndex: ZERO_BI,
+    totalValueLockedToken0: ZERO_BD,
+    totalValueLockedToken1: ZERO_BD,
+    totalValueLockedUSD: ZERO_BD,
+    totalValueLockedETH: ZERO_BD,
+    totalValueLockedUSDUntracked: ZERO_BD,
+    volumeToken0: ZERO_BD,
+    volumeToken1: ZERO_BD,
+    volumeUSD: ZERO_BD,
+    feesUSD: ZERO_BD,
+    untrackedVolumeUSD: ZERO_BD,
+
+    collectedFeesToken0: ZERO_BD,
+    collectedFeesToken1: ZERO_BD,
+    collectedFeesUSD: ZERO_BD,
   };
 
   context.Pool.set(poolObject);
