@@ -11,7 +11,8 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "event Initialize(uint160 sqrtPriceX96, int24 tick)"
-        requiredEntities: []
+        requiredEntities:
+          - name: "Pool"
 networks:
   - id: 1 # Ethereum
     start_block: 16955547 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F one from pancakeswap: 16950686

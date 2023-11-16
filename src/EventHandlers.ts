@@ -44,32 +44,24 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
 
     context.Factory.set(factoryObject);
   }
-});
 
-// event Initialize(uint160 sqrtPriceX96, int24 tick)
-PoolContract_Initialize_loader(({ event, context }) => {}); // don't need a loader for this event as no entities will be updated in the handler
-
-PoolContract_Initialize_handler(({ event, context }) => {
-  let tick = event.params.tick;
-  let sqrtPrice = event.params.sqrtPriceX96;
-
-  const dexKey = getPoolAddressToDex(event.srcAddress);
+  const dexKey = getPoolAddressToDex(event.params.pool);
   if (!dexKey) {
     return null;
   }
 
   let poolObject: PoolEntity = {
-    id: event.srcAddress,
+    id: event.params.pool,
     createdAtTimestamp: BigInt(event.blockTimestamp), // can see this list of available properties here https://docs.envio.dev/docs/event-handlers
-    tick: tick,
+    tick: ZERO_BI,
     dexKey: dexKey,
     //   token0: token0.id,
     // token1: token1.id,
-    feeTier: ZERO_BI, //BigInt(event.params.tick), //BigInt.fromI32(event.params.fee),
+    feeTier: BigInt(event.params.fee), //BigInt.fromI32(event.params.fee),
     createdAtBlockNumber: BigInt(event.blockNumber),
     liquidityProviderCount: ZERO_BI,
     txCount: ZERO_BI,
-    sqrtPrice: sqrtPrice,
+    sqrtPrice: ZERO_BI,
     liquidity: ZERO_BI,
     feeGrowthGlobal0X128: ZERO_BI,
     feeGrowthGlobal1X128: ZERO_BI,
@@ -93,4 +85,25 @@ PoolContract_Initialize_handler(({ event, context }) => {
   };
 
   context.Pool.set(poolObject);
+});
+
+// event Initialize(uint160 sqrtPriceX96, int24 tick)
+PoolContract_Initialize_loader(({ event, context }) => {
+  let poolAddress = event.srcAddress;
+  context.Pool.load(poolAddress);
+});
+
+PoolContract_Initialize_handler(({ event, context }) => {
+  let pool = context.Pool.get(event.srcAddress);
+
+  if (pool) {
+    let poolObject: PoolEntity = {
+      ...pool,
+      tick: event.params.tick,
+      sqrtPrice: event.params.sqrtPriceX96,
+    };
+    context.Pool.set(poolObject);
+  } else {
+    context.log.info("no pool: " + event.srcAddress);
+  }
 });
