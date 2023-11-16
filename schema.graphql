@@ -5,8 +5,6 @@ type Factory {
   id: ID!
   # the dex this is on
   dexKey: String!
-  # current owner of the factory
-  owner: Bytes!
   # amount of pools created
   poolCount: BigInt!
   # # amoutn of transactions all time

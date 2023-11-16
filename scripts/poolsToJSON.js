@@ -49,16 +49,16 @@ async function poolsToJSON() {
       console.log("uniswapData", response);
       if (response.data.pools) {
         for (let pool of response.data.pools) {
-          processedData[pool.id] = subgraph.key;
+          processedData[pool.id.toLowerCase()] = subgraph.key;
         }
       }
       page++;
     } while (response.data.pools && response.data.pools.length > 0);
   }
 
-  const filepath = "./src/poolAddressToDex.json";
+  const filepath = "./src/utils/poolAddressToDex.json";
   fs.writeFileSync(filepath, JSON.stringify(processedData, 2, 2));
-  console.log("Wrote pools out to ./src/poolAddressToDex.json");
+  console.log("Wrote pools out to ./src/utils/poolAddressToDex.json");
 }
 
 poolsToJSON();
