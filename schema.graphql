@@ -29,6 +29,43 @@ type Factory {
   # totalValueLockedETHUntracked: Float!
 }
 
+type Token @entity {
+  # token address
+  id: ID!
+  # token symbol
+  symbol: String!
+  # token name
+  name: String!
+  # token decimals
+  decimals: BigInt!
+  # token total supply
+  totalSupply: BigInt!
+  # volume in token units
+  volume: Float!
+  # volume in derived USD
+  volumeUSD: Float!
+  # volume in USD even on pools with less reliable USD values
+  untrackedVolumeUSD: Float!
+  # fees in USD
+  feesUSD: Float!
+  # transactions across all pools that include this token
+  txCount: BigInt!
+  # number of pools containing this token
+  poolCount: BigInt!
+  # liquidity across all pools in token units
+  totalValueLocked: Float!
+  # liquidity across all pools in derived USD
+  totalValueLockedUSD: Float!
+  # TVL derived in USD untracked
+  totalValueLockedUSDUntracked: Float!
+  # derived price in ETH
+  derivedETH: Float!
+  # pools token is in that are white listed for USD pricing
+  # whitelistPools: [Pool!]!
+  # derived fields
+  # tokenDayData: [TokenDayData!]! @derivedFrom(field: "token")
+}
+
 type Pool @entity {
   # pool address
   id: ID!
@@ -39,9 +76,9 @@ type Pool @entity {
   # block pool was created at
   createdAtBlockNumber: BigInt!
   # token0
-  # token0: Token!
+  token0: Token!
   # token1
-  # token1: Token!
+  token1: Token!
   # fee amount
   feeTier: BigInt!
   # in range liquidity

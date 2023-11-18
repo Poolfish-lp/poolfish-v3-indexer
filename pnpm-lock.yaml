@@ -8,9 +8,15 @@ importers:
 
   .:
     dependencies:
+      big-integer:
+        specifier: ^1.6.51
+        version: 1.6.51
       envio:
         specifier: 0.0.22
         version: 0.0.22
+      prettier:
+        specifier: ^3.1.0
+        version: 3.1.0
       ts-node:
         specifier: 10.9.1
         version: 10.9.1(@types/node@20.8.8)(typescript@5.2.2)
@@ -293,6 +299,11 @@ packages:
 
   /base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+    dev: false
+
+  /big-integer@1.6.51:
+    resolution: {integrity: sha512-GPEid2Y9QU1Exl1rpO9B2IPJGHPSupF5GnVIP0blYvNOMer2bTvSWs1jGOUg04hTmu67nmLsQ9TBo1puaotBHg==}
+    engines: {node: '>=0.6'}
     dev: false
 
   /bintrees@1.0.2:
@@ -918,6 +929,12 @@ packages:
   /postgres@3.4.1:
     resolution: {integrity: sha512-Wasjv6WEzrZXbwKByR2RGD7MBfj7VBqco3hYWz8ifzSAp6tb2L6MlmcKFzkmgV1jT7/vKlcSa+lxXZeTdeVMzQ==}
     engines: {node: '>=12'}
+    dev: false
+
+  /prettier@3.1.0:
+    resolution: {integrity: sha512-TQLvXjq5IAibjh8EpBIkNKxO749UEWABoiIZehEPiY4GNpVdhaFKqSTu+QrlU6D2dPAfubRmtJTi4K4YkQ5eXw==}
+    engines: {node: '>=14'}
+    hasBin: true
     dev: false
 
   /process-warning@2.3.0:

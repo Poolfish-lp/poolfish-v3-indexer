@@ -7,15 +7,18 @@
     "watch": "tsc --watch",
     "codegen": "envio codegen",
     "start": "ts-node generated/src/Index.bs.js",
+    "prettier": "prettier . --write",
     "generate-json": "node ./scripts/poolsToJSON.js"
   },
   "devDependencies": {
     "@types/node": "20.8.8",
-    "typescript": "5.2.2",
-    "rescript": "10.1.4"
+    "rescript": "10.1.4",
+    "typescript": "5.2.2"
   },
   "dependencies": {
-    "ts-node": "10.9.1",
-    "envio": "0.0.22"
+    "big-integer": "^1.6.51",
+    "envio": "0.0.22",
+    "prettier": "^3.1.0",
+    "ts-node": "10.9.1"
   }
 }
