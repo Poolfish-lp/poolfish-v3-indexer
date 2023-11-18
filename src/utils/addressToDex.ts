@@ -4,6 +4,7 @@ const mapper: { [key: string]: string } = {
     '0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7': 'uniswap',
     '0x917933899c6a5F8E37F31E19f92CdBFF7e8FF0e2': 'uniswap',
     '0xf78031CBCA409F2FB6876BDFDBc1b2df24cF9bEf': 'uniswap',
+    '0xbaceb8ec6b9355dfc0269c18bac9d6e2bdc29c4f': 'sushi',
 }
 
 export function addressToDex(address: string): string {

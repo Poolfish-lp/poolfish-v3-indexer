@@ -15,7 +15,7 @@ export const ZERO_BD = '0' // BigDecimal.fromString("0");
 export const WHITELISTED_TOKEN_ADDRESSES: string[] =
     '{{ v3.whitelistedTokenAddresses }}'.split(',')
 
-export const NATIVE_ADDRESS = '{{ v3.native.address }}'
+export const NATIVE_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' //'{{ v3.native.address }}'  native address for mainnet weth
 
 export const STABLE_TOKEN_ADDRESSES: string[] =
     '{{ v3.stableTokenAddresses }}'.split(',')
@@ -24,8 +24,8 @@ export const STABLE_TOKEN_ADDRESSES: string[] =
 //   "{{ v3.minimumEthLocked }}"
 // );
 
-// export const NATIVE_PRICE_POOL = Address.fromString("{{ v3.nativePricePool }}")
-//   .toHex()
-//   .toLowerCase();
+export const NATIVE_PRICE_POOL = '0x763d3b7296e7c9718ad5b058ac2692a19e5b3638' //Address.fromString("{{ v3.nativePricePool }}") //native address for sushi mainnet
+// .toHex()
+// .toLowerCase();
 
 // export const factoryContract = FactoryContract.bind(FACTORY_ADDRESS);

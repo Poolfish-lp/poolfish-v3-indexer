@@ -14,20 +14,23 @@ contracts:
         requiredEntities:
           - name: "Pool"
           - name: "Token"
+          - name: "Bundle"
       - event: "event Mint(address sender, address indexed owner, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount, uint256 amount0, uint256 amount1)"
         requiredEntities:
           - name: "Pool"
           - name: "Token"
+          - name: "Bundle"
 networks:
-  # - id: 1 # Ethereum
-  #   start_block: 16955547 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F one from pancakeswap: 16950686
-  #   contracts:
-  #     - name: Factory
-  #       address:
-  #         - "0x1F98431c8aD98523631AE4a59f267346ea31F984" # uniswap
-  #         - "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865" # pancakeswap
-  #     - name: Pool
-  #       address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
+  - id: 1 # Ethereum
+    start_block: 16955547 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F one from pancakeswap: 16950686
+    contracts:
+      - name: Factory
+        address:
+          # - "0x1F98431c8aD98523631AE4a59f267346ea31F984" # uniswap
+          # - "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865" # pancakeswap
+          - "0xbaceb8ec6b9355dfc0269c18bac9d6e2bdc29c4f" # sushi
+      - name: Pool
+        address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
   # - id: 137 # Polygon
   #   start_block: 41024971 # The deployment block https://polygonscan.com/address/0x917933899c6a5F8E37F31E19f92CdBFF7e8FF0e2
   #   contracts:
@@ -42,12 +45,12 @@ networks:
   #       address: "0xf78031CBCA409F2FB6876BDFDBc1b2df24cF9bEf"
   #     - name: Pool
   #       address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
-  - id: 56 # BSC
-    start_block: 26956207 # The deployment block https://bscscan.com/txs?a=0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865
-    contracts:
-      - name: Factory
-        address:
-          - "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7" # uniswap
-          # - "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865" # pancakeswap
-      - name: Pool
-        address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts
+  # - id: 56 # BSC
+  #   start_block: 26956207 # The deployment block https://bscscan.com/txs?a=0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865
+  #   contracts:
+  #     - name: Factory
+  #       address:
+  #         - "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7" # uniswap
+  #         # - "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865" # pancakeswap
+  #     - name: Pool
+  #       address: "0x0000000000000000000000000000000000000000" # This is temporary, the next update doesnt require an address for dynamicly registered contracts

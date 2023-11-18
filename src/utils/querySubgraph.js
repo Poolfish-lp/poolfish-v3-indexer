@@ -7,16 +7,14 @@ const querySubgraph = async (query, subgraphEndpoint) => {
 
     const errors = data?.errors
     if (errors && errors.length > 0) {
-        console.error('Uniswap Subgraph Errors', { errors, query })
+        console.error('Subgraph Errors', { errors, query })
         if (
             errors[0].message == 'indexing_error' ||
             errors[0].message == 'Store error: database unavailable'
         ) {
             throw new Error('subgraph_down')
         } else {
-            throw new Error(
-                `Uniswap Subgraph Errors: ${JSON.stringify(errors)}`,
-            )
+            throw new Error(`Subgraph Errors: ${JSON.stringify(errors)}`)
         }
     }
 

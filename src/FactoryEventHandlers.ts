@@ -40,6 +40,12 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
             dexKey: addressToDex(event.srcAddress),
         }
         context.Factory.set(factoryObject)
+
+        let bundleObject = {
+            id: '1',
+            ethPriceUSD: ZERO_BD,
+        }
+        context.Bundle.set(bundleObject)
     } else {
         let factoryObject: FactoryEntity = {
             ...factory,

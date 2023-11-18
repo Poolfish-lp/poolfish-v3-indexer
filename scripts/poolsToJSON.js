@@ -4,6 +4,7 @@ const fs = require('fs')
 const dexKeys = {
     uniswap: 'uniswap',
     pancakeswap: 'pancakeswap',
+    sushi: 'sushi',
 }
 
 const subgraphs = [
@@ -26,6 +27,11 @@ const subgraphs = [
             'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-bsc',
         key: dexKeys.pancakeswap,
     },
+    {
+        endpoint:
+            'https://api.thegraph.com/subgraphs/name/sushi-v3/v3-ethereum',
+        key: dexKeys.sushi,
+    },
 ]
 
 async function poolsToJSON() {
@@ -37,9 +43,10 @@ async function poolsToJSON() {
         do {
             response = await querySubgraph(
                 `{
-        pools (first: 300, skip: ${
-            page * 300
-        }, orderBy: totalValueLockedUSD, orderDirection: desc, where: {liquidity_gt: 0, totalValueLockedUSD_gte: 1000, volumeUSD_gte: 10000}) {
+        pools (first: 300, skip: ${Math.min(
+            page * 300,
+            5000,
+        )}, orderBy: totalValueLockedUSD, orderDirection: desc, where: {liquidity_gt: 1000, totalValueLockedUSD_gte: 1000, volumeUSD_gte: 0}) {
           id
           token0 {
             name
@@ -60,7 +67,7 @@ async function poolsToJSON() {
   `,
                 subgraph.endpoint,
             )
-            console.log('uniswapData', response)
+            console.log('pool data', response)
             if (response.data.pools) {
                 for (let pool of response.data.pools) {
                     processedData[pool.id.toLowerCase()] = {

@@ -29,6 +29,13 @@ type Factory {
     # totalValueLockedETHUntracked: String!
 }
 
+# stores for USD calculations
+type Bundle @entity {
+    id: ID!
+    # price of ETH in usd
+    ethPriceUSD: String!
+}
+
 type Token @entity {
     # token address
     id: ID!
