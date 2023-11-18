@@ -16,7 +16,9 @@
     "typescript": "5.2.2"
   },
   "dependencies": {
+    "@types/big.js": "^6.2.2",
     "big-integer": "^1.6.51",
+    "big.js": "^6.2.1",
     "envio": "0.0.22",
     "prettier": "^3.1.0",
     "ts-node": "10.9.1"

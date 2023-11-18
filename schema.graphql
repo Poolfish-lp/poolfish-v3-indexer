@@ -10,23 +10,23 @@ type Factory {
     # # amoutn of transactions all time
     # txCount: BigInt!
     # # total volume all time in derived USD
-    # totalVolumeUSD: Float!
+    # totalVolumeUSD: String!
     # # total volume all time in derived ETH
-    # totalVolumeETH: Float!
+    # totalVolumeETH: String!
     # # total swap fees all time in USD
-    # totalFeesUSD: Float!
+    # totalFeesUSD: String!
     # # total swap fees all time in USD
-    # totalFeesETH: Float!
+    # totalFeesETH: String!
     # # all volume even through less reliable USD values
-    # untrackedVolumeUSD: Float!
+    # untrackedVolumeUSD: String!
     # # TVL derived in USD
-    # totalValueLockedUSD: Float!
+    # totalValueLockedUSD: String!
     # # TVL derived in ETH
-    # totalValueLockedETH: Float!
+    # totalValueLockedETH: String!
     # # TVL derived in USD untracked
-    # totalValueLockedUSDUntracked: Float!
+    # totalValueLockedUSDUntracked: String!
     # # TVL derived in ETH untracked
-    # totalValueLockedETHUntracked: Float!
+    # totalValueLockedETHUntracked: String!
 }
 
 type Token @entity {
@@ -41,25 +41,25 @@ type Token @entity {
     # token total supply
     totalSupply: BigInt!
     # volume in token units
-    volume: Float!
+    volume: String!
     # volume in derived USD
-    volumeUSD: Float!
+    volumeUSD: String!
     # volume in USD even on pools with less reliable USD values
-    untrackedVolumeUSD: Float!
+    untrackedVolumeUSD: String!
     # fees in USD
-    feesUSD: Float!
+    feesUSD: String!
     # transactions across all pools that include this token
     txCount: BigInt!
     # number of pools containing this token
     poolCount: BigInt!
     # liquidity across all pools in token units
-    totalValueLocked: Float!
+    totalValueLocked: String!
     # liquidity across all pools in derived USD
-    totalValueLockedUSD: Float!
+    totalValueLockedUSD: String!
     # TVL derived in USD untracked
-    totalValueLockedUSDUntracked: Float!
+    totalValueLockedUSDUntracked: String!
     # derived price in ETH
-    derivedETH: Float!
+    derivedETH: String!
     # pools token is in that are white listed for USD pricing
     # whitelistPools: [Pool!]!
     # derived fields
@@ -90,41 +90,41 @@ type Pool @entity {
     # tracker for global fee growth
     feeGrowthGlobal1X128: BigInt!
     # token0 per token1
-    token0Price: Float!
+    token0Price: String!
     # token1 per token0
-    token1Price: Float!
+    token1Price: String!
     # current tick
     tick: BigInt
     # current observation index
     observationIndex: BigInt!
     # all time token0 swapped
-    volumeToken0: Float!
+    volumeToken0: String!
     # all time token1 swapped
-    volumeToken1: Float!
+    volumeToken1: String!
     # all time USD swapped
-    volumeUSD: Float!
+    volumeUSD: String!
     # all time USD swapped, unfiltered for unreliable USD pools
-    untrackedVolumeUSD: Float!
+    untrackedVolumeUSD: String!
     # fees in USD
-    feesUSD: Float!
+    feesUSD: String!
     # all time number of transactions
     txCount: BigInt!
     # all time fees collected token0
-    collectedFeesToken0: Float!
+    collectedFeesToken0: String!
     # all time fees collected token1
-    collectedFeesToken1: Float!
+    collectedFeesToken1: String!
     # all time fees collected derived USD
-    collectedFeesUSD: Float!
+    collectedFeesUSD: String!
     # total token 0 across all ticks
-    totalValueLockedToken0: Float!
+    totalValueLockedToken0: String!
     # total token 1 across all ticks
-    totalValueLockedToken1: Float!
+    totalValueLockedToken1: String!
     # tvl derived ETH
-    totalValueLockedETH: Float!
+    totalValueLockedETH: String!
     # tvl USD
-    totalValueLockedUSD: Float!
+    totalValueLockedUSD: String!
     # TVL derived in USD untracked
-    totalValueLockedUSDUntracked: Float!
+    totalValueLockedUSDUntracked: String!
     # Fields used to help derived relationship
     liquidityProviderCount: BigInt! # used to detect new exchanges
     # hourly snapshots of pool data

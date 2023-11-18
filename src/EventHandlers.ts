@@ -18,6 +18,7 @@ import { getPoolAddressToInfo } from './utils/getPoolAddressToInfo'
 import bigInt from 'big-integer'
 import { convertTokenToDecimal } from './utils/misc'
 import { poolToToken } from './utils/globalState'
+import Big from 'big.js'
 
 // event event PoolCreated(address indexed pool, address indexed token0, address indexed token1, uint24 fee, int24 tickSpacing)
 FactoryContract_PoolCreated_loader(({ event, context }) => {
@@ -224,17 +225,17 @@ PoolContract_Mint_handler(({ event, context }) => {
         ...pool,
         liquidity: liquidity,
         txCount: pool.txCount + ONE_BI,
-        totalValueLockedToken0: bigInt(pool.totalValueLockedToken0)
+        totalValueLockedToken0: new Big(pool.totalValueLockedToken0)
             .plus(amount0)
-            .toJSNumber(),
-        totalValueLockedToken1: bigInt(pool.totalValueLockedToken1)
+            .toString(),
+        totalValueLockedToken1: new Big(pool.totalValueLockedToken1)
             .plus(amount1)
-            .toJSNumber(),
-        totalValueLockedETH: bigInt(pool.totalValueLockedToken0)
+            .toString(),
+        totalValueLockedETH: new Big(pool.totalValueLockedToken0)
             .times(2000) // derivedETH
-            .plus(bigInt(pool.totalValueLockedToken1).times(token1.derivedETH))
-            .toJSNumber(),
-        // totalValueLockedUSD: bigInt(pool.totalValueLockedETH).times(bundle.ethPriceUSD),
+            .plus(new Big(pool.totalValueLockedToken1).times(token1.derivedETH))
+            .toString(),
+        // totalValueLockedUSD: new Big(pool.totalValueLockedETH).times(bundle.ethPriceUSD).toString(),
     }
     context.Pool.set(poolObject)
 })

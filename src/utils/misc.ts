@@ -3,15 +3,16 @@
 // import { Transaction } from "../../generated/schema";
 import bigInt, { BigInteger } from 'big-integer'
 import { ONE_BI, ZERO_BI, ZERO_BD /*, ONE_BD*/ } from '../constants'
+import Big from 'big.js'
 
-export function exponentToBigDecimal(decimals: BigInt): number {
-    let bd: number = 1 //BigDecimal.fromString("1");
+export function exponentToBig(decimals: BigInt): Big {
+    let bd = new Big(1)
     for (
         let i = bigInt(ZERO_BI);
         bigInt(i).lt(bigInt(decimals.toString()));
         i = bigInt(i).plus(ONE_BI)
     ) {
-        bd = bd * 10
+        bd = bd.times(10)
     }
 
     return bd
@@ -90,13 +91,11 @@ export function exponentToBigDecimal(decimals: BigInt): number {
 export function convertTokenToDecimal(
     tokenAmount: BigInt,
     exchangeDecimals: BigInt,
-): number {
+): Big {
     if (exchangeDecimals == ZERO_BI) {
-        return bigInt(tokenAmount.toString()).toJSNumber()
+        return new Big(tokenAmount.toString())
     }
-    return bigInt(tokenAmount.toString())
-        .divide(exponentToBigDecimal(exchangeDecimals))
-        .toJSNumber()
+    return new Big(tokenAmount.toString()).div(exponentToBig(exchangeDecimals))
 }
 
 // export function convertEthToDecimal(eth: BigInt): BigDecimal {

@@ -8,7 +8,7 @@ export const NETWORK = '{{ network }}'
 
 export const ZERO_BI = 0n // .fromI32(0);
 export const ONE_BI = 1n // BigInt.fromI32(1);
-export const ZERO_BD = 0.0 // BigDecimal.fromString("0");
+export const ZERO_BD = '0' // BigDecimal.fromString("0");
 // export const ONE_BD = BigDecimal.fromString("1");
 // export const BI_18 = BigInt.fromI32(18);
 
