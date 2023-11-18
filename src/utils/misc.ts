@@ -1,20 +1,20 @@
 /* eslint-disable prefer-const */
 // import { BigInt, BigDecimal, ethereum } from "@graphprotocol/graph-ts";
 // import { Transaction } from "../../generated/schema";
-import bigInt, { BigInteger } from "big-integer";
-import { ONE_BI, ZERO_BI, ZERO_BD /*, ONE_BD*/ } from "../constants";
+import bigInt, { BigInteger } from 'big-integer'
+import { ONE_BI, ZERO_BI, ZERO_BD /*, ONE_BD*/ } from '../constants'
 
 export function exponentToBigDecimal(decimals: BigInt): number {
-  let bd: number = 1; //BigDecimal.fromString("1");
-  for (
-    let i = bigInt(ZERO_BI);
-    bigInt(i).lt(bigInt(decimals.toString()));
-    i = bigInt(i).plus(ONE_BI)
-  ) {
-    bd = bd * 10;
-  }
+    let bd: number = 1 //BigDecimal.fromString("1");
+    for (
+        let i = bigInt(ZERO_BI);
+        bigInt(i).lt(bigInt(decimals.toString()));
+        i = bigInt(i).plus(ONE_BI)
+    ) {
+        bd = bd * 10
+    }
 
-  return bd;
+    return bd
 }
 
 // // return 0 if denominator is 0 in division
@@ -88,15 +88,15 @@ export function exponentToBigDecimal(decimals: BigInt): number {
 // }
 
 export function convertTokenToDecimal(
-  tokenAmount: BigInt,
-  exchangeDecimals: BigInt
+    tokenAmount: BigInt,
+    exchangeDecimals: BigInt,
 ): number {
-  if (exchangeDecimals == ZERO_BI) {
-    return bigInt(tokenAmount.toString()).toJSNumber();
-  }
-  return bigInt(tokenAmount.toString())
-    .divide(exponentToBigDecimal(exchangeDecimals))
-    .toJSNumber();
+    if (exchangeDecimals == ZERO_BI) {
+        return bigInt(tokenAmount.toString()).toJSNumber()
+    }
+    return bigInt(tokenAmount.toString())
+        .divide(exponentToBigDecimal(exchangeDecimals))
+        .toJSNumber()
 }
 
 // export function convertEthToDecimal(eth: BigInt): BigDecimal {

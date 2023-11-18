@@ -1,140 +1,140 @@
 # Can read more on the schema here: https://docs.envio.dev/docs/schema
 
 type Factory {
-  # factory address
-  id: ID!
-  # the dex this is on
-  dexKey: String!
-  # amount of pools created
-  poolCount: BigInt!
-  # # amoutn of transactions all time
-  # txCount: BigInt!
-  # # total volume all time in derived USD
-  # totalVolumeUSD: Float!
-  # # total volume all time in derived ETH
-  # totalVolumeETH: Float!
-  # # total swap fees all time in USD
-  # totalFeesUSD: Float!
-  # # total swap fees all time in USD
-  # totalFeesETH: Float!
-  # # all volume even through less reliable USD values
-  # untrackedVolumeUSD: Float!
-  # # TVL derived in USD
-  # totalValueLockedUSD: Float!
-  # # TVL derived in ETH
-  # totalValueLockedETH: Float!
-  # # TVL derived in USD untracked
-  # totalValueLockedUSDUntracked: Float!
-  # # TVL derived in ETH untracked
-  # totalValueLockedETHUntracked: Float!
+    # factory address
+    id: ID!
+    # the dex this is on
+    dexKey: String!
+    # amount of pools created
+    poolCount: BigInt!
+    # # amoutn of transactions all time
+    # txCount: BigInt!
+    # # total volume all time in derived USD
+    # totalVolumeUSD: Float!
+    # # total volume all time in derived ETH
+    # totalVolumeETH: Float!
+    # # total swap fees all time in USD
+    # totalFeesUSD: Float!
+    # # total swap fees all time in USD
+    # totalFeesETH: Float!
+    # # all volume even through less reliable USD values
+    # untrackedVolumeUSD: Float!
+    # # TVL derived in USD
+    # totalValueLockedUSD: Float!
+    # # TVL derived in ETH
+    # totalValueLockedETH: Float!
+    # # TVL derived in USD untracked
+    # totalValueLockedUSDUntracked: Float!
+    # # TVL derived in ETH untracked
+    # totalValueLockedETHUntracked: Float!
 }
 
 type Token @entity {
-  # token address
-  id: ID!
-  # token symbol
-  symbol: String!
-  # token name
-  name: String!
-  # token decimals
-  decimals: BigInt!
-  # token total supply
-  totalSupply: BigInt!
-  # volume in token units
-  volume: Float!
-  # volume in derived USD
-  volumeUSD: Float!
-  # volume in USD even on pools with less reliable USD values
-  untrackedVolumeUSD: Float!
-  # fees in USD
-  feesUSD: Float!
-  # transactions across all pools that include this token
-  txCount: BigInt!
-  # number of pools containing this token
-  poolCount: BigInt!
-  # liquidity across all pools in token units
-  totalValueLocked: Float!
-  # liquidity across all pools in derived USD
-  totalValueLockedUSD: Float!
-  # TVL derived in USD untracked
-  totalValueLockedUSDUntracked: Float!
-  # derived price in ETH
-  derivedETH: Float!
-  # pools token is in that are white listed for USD pricing
-  # whitelistPools: [Pool!]!
-  # derived fields
-  # tokenDayData: [TokenDayData!]! @derivedFrom(field: "token")
+    # token address
+    id: ID!
+    # token symbol
+    symbol: String!
+    # token name
+    name: String!
+    # token decimals
+    decimals: BigInt!
+    # token total supply
+    totalSupply: BigInt!
+    # volume in token units
+    volume: Float!
+    # volume in derived USD
+    volumeUSD: Float!
+    # volume in USD even on pools with less reliable USD values
+    untrackedVolumeUSD: Float!
+    # fees in USD
+    feesUSD: Float!
+    # transactions across all pools that include this token
+    txCount: BigInt!
+    # number of pools containing this token
+    poolCount: BigInt!
+    # liquidity across all pools in token units
+    totalValueLocked: Float!
+    # liquidity across all pools in derived USD
+    totalValueLockedUSD: Float!
+    # TVL derived in USD untracked
+    totalValueLockedUSDUntracked: Float!
+    # derived price in ETH
+    derivedETH: Float!
+    # pools token is in that are white listed for USD pricing
+    # whitelistPools: [Pool!]!
+    # derived fields
+    # tokenDayData: [TokenDayData!]! @derivedFrom(field: "token")
 }
 
 type Pool @entity {
-  # pool address
-  id: ID!
-  # the dex this is on
-  dexKey: String!
-  # creation
-  createdAtTimestamp: BigInt!
-  # block pool was created at
-  createdAtBlockNumber: BigInt!
-  # token0
-  token0: Token!
-  # token1
-  token1: Token!
-  # fee amount
-  feeTier: BigInt!
-  # in range liquidity
-  liquidity: BigInt!
-  # current price tracker
-  sqrtPrice: BigInt!
-  # tracker for global fee growth
-  feeGrowthGlobal0X128: BigInt!
-  # tracker for global fee growth
-  feeGrowthGlobal1X128: BigInt!
-  # token0 per token1
-  token0Price: Float!
-  # token1 per token0
-  token1Price: Float!
-  # current tick
-  tick: BigInt
-  # current observation index
-  observationIndex: BigInt!
-  # all time token0 swapped
-  volumeToken0: Float!
-  # all time token1 swapped
-  volumeToken1: Float!
-  # all time USD swapped
-  volumeUSD: Float!
-  # all time USD swapped, unfiltered for unreliable USD pools
-  untrackedVolumeUSD: Float!
-  # fees in USD
-  feesUSD: Float!
-  # all time number of transactions
-  txCount: BigInt!
-  # all time fees collected token0
-  collectedFeesToken0: Float!
-  # all time fees collected token1
-  collectedFeesToken1: Float!
-  # all time fees collected derived USD
-  collectedFeesUSD: Float!
-  # total token 0 across all ticks
-  totalValueLockedToken0: Float!
-  # total token 1 across all ticks
-  totalValueLockedToken1: Float!
-  # tvl derived ETH
-  totalValueLockedETH: Float!
-  # tvl USD
-  totalValueLockedUSD: Float!
-  # TVL derived in USD untracked
-  totalValueLockedUSDUntracked: Float!
-  # Fields used to help derived relationship
-  liquidityProviderCount: BigInt! # used to detect new exchanges
-  # hourly snapshots of pool data
-  # poolHourData: [PoolHourData!]! @derivedFrom(field: "pool")
-  # daily snapshots of pool data
-  # poolDayData: [PoolDayData!]! @derivedFrom(field: "pool")
-  # derived fields
-  # mints: [Mint!]! @derivedFrom(field: "pool")
-  # burns: [Burn!]! @derivedFrom(field: "pool")
-  # swaps: [Swap!]! @derivedFrom(field: "pool")
-  # collects: [Collect!]! @derivedFrom(field: "pool")
-  # ticks: [Tick!]! @derivedFrom(field: "pool")
+    # pool address
+    id: ID!
+    # the dex this is on
+    dexKey: String!
+    # creation
+    createdAtTimestamp: BigInt!
+    # block pool was created at
+    createdAtBlockNumber: BigInt!
+    # token0
+    token0: Token!
+    # token1
+    token1: Token!
+    # fee amount
+    feeTier: BigInt!
+    # in range liquidity
+    liquidity: BigInt!
+    # current price tracker
+    sqrtPrice: BigInt!
+    # tracker for global fee growth
+    feeGrowthGlobal0X128: BigInt!
+    # tracker for global fee growth
+    feeGrowthGlobal1X128: BigInt!
+    # token0 per token1
+    token0Price: Float!
+    # token1 per token0
+    token1Price: Float!
+    # current tick
+    tick: BigInt
+    # current observation index
+    observationIndex: BigInt!
+    # all time token0 swapped
+    volumeToken0: Float!
+    # all time token1 swapped
+    volumeToken1: Float!
+    # all time USD swapped
+    volumeUSD: Float!
+    # all time USD swapped, unfiltered for unreliable USD pools
+    untrackedVolumeUSD: Float!
+    # fees in USD
+    feesUSD: Float!
+    # all time number of transactions
+    txCount: BigInt!
+    # all time fees collected token0
+    collectedFeesToken0: Float!
+    # all time fees collected token1
+    collectedFeesToken1: Float!
+    # all time fees collected derived USD
+    collectedFeesUSD: Float!
+    # total token 0 across all ticks
+    totalValueLockedToken0: Float!
+    # total token 1 across all ticks
+    totalValueLockedToken1: Float!
+    # tvl derived ETH
+    totalValueLockedETH: Float!
+    # tvl USD
+    totalValueLockedUSD: Float!
+    # TVL derived in USD untracked
+    totalValueLockedUSDUntracked: Float!
+    # Fields used to help derived relationship
+    liquidityProviderCount: BigInt! # used to detect new exchanges
+    # hourly snapshots of pool data
+    # poolHourData: [PoolHourData!]! @derivedFrom(field: "pool")
+    # daily snapshots of pool data
+    # poolDayData: [PoolDayData!]! @derivedFrom(field: "pool")
+    # derived fields
+    # mints: [Mint!]! @derivedFrom(field: "pool")
+    # burns: [Burn!]! @derivedFrom(field: "pool")
+    # swaps: [Swap!]! @derivedFrom(field: "pool")
+    # collects: [Collect!]! @derivedFrom(field: "pool")
+    # ticks: [Tick!]! @derivedFrom(field: "pool")
 }
