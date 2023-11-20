@@ -9,7 +9,7 @@ export const NETWORK = '{{ network }}'
 export const ZERO_BI = 0n // .fromI32(0);
 export const ONE_BI = 1n // BigInt.fromI32(1);
 export const ZERO_BD = '0' // BigDecimal.fromString("0");
-// export const ONE_BD = BigDecimal.fromString("1");
+export const ONE_BD = '1' //BigDecimal.fromString("1");
 // export const BI_18 = BigInt.fromI32(18);
 
 export const WHITELISTED_TOKEN_ADDRESSES: string[] =
@@ -20,7 +20,7 @@ export const NATIVE_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' //'{{
 export const STABLE_TOKEN_ADDRESSES: string[] =
     '{{ v3.stableTokenAddresses }}'.split(',')
 
-// export const MINIMUM_ETH_LOCKED = BigDecimal.fromString(
+export const MINIMUM_ETH_LOCKED = 0 //BigDecimal.fromString(
 //   "{{ v3.minimumEthLocked }}"
 // );
 

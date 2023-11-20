@@ -1,25 +1,41 @@
 /* eslint-disable prefer-const */
-import { PoolEntity } from '../../generated/src/Types.gen'
-import { NATIVE_ADDRESS, NATIVE_PRICE_POOL, ZERO_BD } from '../constants'
+import bigInt from 'big-integer'
+import {
+    BundleEntity,
+    PoolEntity,
+    TokenEntity,
+} from '../../generated/src/Types.gen'
+import {
+    MINIMUM_ETH_LOCKED,
+    NATIVE_ADDRESS,
+    NATIVE_PRICE_POOL,
+    ONE_BD,
+    ZERO_BD,
+} from '../constants'
 import Big from 'big.js'
+import { exponentToBig, safeDiv } from './misc'
 
-// const Q192 = BigInt.fromI32(2).pow(BigInt.fromI32(192).toI32() as u8)
+const Q192 = bigInt(2).pow(bigInt(192)) // BigInt.fromI32(2).pow(BigInt.fromI32(192).toI32() as u8)
 
-// export function sqrtPriceX96ToTokenPrices(
-//     sqrtPriceX96: BigInt,
-//     token0: Token,
-//     token1: Token,
-// ): BigDecimal[] {
-//     let num = sqrtPriceX96.times(sqrtPriceX96).toBigDecimal()
-//     let denom = Q192.toBigDecimal()
-//     let price1 = num
-//         .div(denom)
-//         .times(exponentToBigDecimal(token0.decimals))
-//         .div(exponentToBigDecimal(token1.decimals))
+export function sqrtPriceX96ToTokenPrices(
+    sqrtPriceX96: BigInt,
+    token0: TokenEntity,
+    token1: TokenEntity,
+): Big[] {
+    let num = new Big(
+        bigInt(sqrtPriceX96.toString())
+            .times(sqrtPriceX96.toString())
+            .toString(),
+    )
+    let denom = new Big(Q192.toString())
+    let price1 = num
+        .div(denom)
+        .times(exponentToBig(token0.decimals))
+        .div(exponentToBig(token1.decimals))
 
-//     let price0 = safeDiv(BigDecimal.fromString('1'), price1)
-//     return [price0, price1]
-// }
+    let price0 = safeDiv(new Big('1'), price1)
+    return [price0, price1]
+}
 
 export function getEthPriceInUSD(nativeAndStablePool: PoolEntity): string {
     // fetch eth prices for each stablecoin
@@ -38,25 +54,27 @@ export function getEthPriceInUSD(nativeAndStablePool: PoolEntity): string {
  * Search through graph to find derived Eth per token.
  * @todo update to be derived ETH (add stablecoin estimates)
  **/
-// export function findEthPerToken(token: Token): BigDecimal {
+// export function findEthPerToken(
+//     token: TokenEntity,
+//     pool: PoolEntity,
+//     bundle: BundleEntity,
+// ): Big {
 //     if (token.id == NATIVE_ADDRESS.toLowerCase()) {
-//         return ONE_BD
+//         return new Big(ONE_BD)
 //     }
 //     let whiteList = token.whitelistPools
 //     // for now just take USD from pool with greatest TVL
 //     // need to update this to actually detect best rate based on liquidity distribution
 //     let largestLiquidityETH = ZERO_BD
-//     let priceSoFar = ZERO_BD
-//     let bundle = Bundle.load('1') as Bundle
+//     let priceSoFar = new Big(ZERO_BD)
 
 //     // hardcoded fix for incorrect rates
 //     // if whitelist includes token - get the safe price
 //     if (STABLE_TOKEN_ADDRESSES.includes(token.id)) {
-//         priceSoFar = safeDiv(ONE_BD, bundle.ethPriceUSD)
+//         priceSoFar = safeDiv(new Big(ONE_BD), new Big(bundle.ethPriceUSD))
 //     } else {
 //         for (let i = 0; i < whiteList.length; ++i) {
 //             let poolAddress = whiteList[i]
-//             let pool = Pool.load(poolAddress) as Pool
 
 //             if (pool.liquidity.gt(ZERO_BI)) {
 //                 if (pool.token0 == token.id) {
@@ -100,46 +118,48 @@ export function getEthPriceInUSD(nativeAndStablePool: PoolEntity): string {
 //     return priceSoFar // nothing was found return 0
 // }
 
-// /**
-//  * Accepts tokens and amounts, return tracked amount based on token whitelist
-//  * If one token on whitelist, return amount in that token converted to USD * 2.
-//  * If both are, return sum of two amounts
-//  * If neither is, return 0
-//  */
-// export function getTrackedAmountUSD(
-//     tokenAmount0: BigDecimal,
-//     token0: Token,
-//     tokenAmount1: BigDecimal,
-//     token1: Token,
-// ): BigDecimal {
-//     let bundle = Bundle.load('1') as Bundle
-//     let price0USD = token0.derivedETH.times(bundle.ethPriceUSD)
-//     let price1USD = token1.derivedETH.times(bundle.ethPriceUSD)
+/**
+ * Accepts tokens and amounts, return tracked amount based on token whitelist
+ * If one token on whitelist, return amount in that token converted to USD * 2.
+ * If both are, return sum of two amounts
+ * If neither is, return 0
+ */
+export function getTrackedAmountUSD(
+    tokenAmount0: Big,
+    token0: TokenEntity,
+    tokenAmount1: Big,
+    token1: TokenEntity,
+    bundle: BundleEntity,
+): Big {
+    let price0USD = new Big(token0.derivedETH).times(bundle.ethPriceUSD)
+    let price1USD = new Big(token1.derivedETH).times(bundle.ethPriceUSD)
 
-//     // both are whitelist tokens, return sum of both amounts
-//     if (
-//         WHITELISTED_TOKEN_ADDRESSES.includes(token0.id) &&
-//         WHITELISTED_TOKEN_ADDRESSES.includes(token1.id)
-//     ) {
-//         return tokenAmount0.times(price0USD).plus(tokenAmount1.times(price1USD))
-//     }
+    return tokenAmount0.times(price0USD).plus(tokenAmount1.times(price1USD))
 
-//     // take double value of the whitelisted token amount
-//     if (
-//         WHITELISTED_TOKEN_ADDRESSES.includes(token0.id) &&
-//         !WHITELISTED_TOKEN_ADDRESSES.includes(token1.id)
-//     ) {
-//         return tokenAmount0.times(price0USD).times(BigDecimal.fromString('2'))
-//     }
+    // both are whitelist tokens, return sum of both amounts
+    // if (
+    //     WHITELISTED_TOKEN_ADDRESSES.includes(token0.id) &&
+    //     WHITELISTED_TOKEN_ADDRESSES.includes(token1.id)
+    // ) {
+    //     return tokenAmount0.times(price0USD).plus(tokenAmount1.times(price1USD))
+    // }
 
-//     // take double value of the whitelisted token amount
-//     if (
-//         !WHITELISTED_TOKEN_ADDRESSES.includes(token0.id) &&
-//         WHITELISTED_TOKEN_ADDRESSES.includes(token1.id)
-//     ) {
-//         return tokenAmount1.times(price1USD).times(BigDecimal.fromString('2'))
-//     }
+    // // take double value of the whitelisted token amount
+    // if (
+    //     WHITELISTED_TOKEN_ADDRESSES.includes(token0.id) &&
+    //     !WHITELISTED_TOKEN_ADDRESSES.includes(token1.id)
+    // ) {
+    //     return tokenAmount0.times(price0USD).times(BigDecimal.fromString('2'))
+    // }
 
-//     // neither token is on white list, tracked amount is 0
-//     return ZERO_BD
-// }
+    // // take double value of the whitelisted token amount
+    // if (
+    //     !WHITELISTED_TOKEN_ADDRESSES.includes(token0.id) &&
+    //     WHITELISTED_TOKEN_ADDRESSES.includes(token1.id)
+    // ) {
+    //     return tokenAmount1.times(price1USD).times(BigDecimal.fromString('2'))
+    // }
+
+    // // neither token is on white list, tracked amount is 0
+    // return ZERO_BD
+}
