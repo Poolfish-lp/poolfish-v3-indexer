@@ -20,6 +20,11 @@ contracts:
           - name: "Pool"
           - name: "Token"
           - name: "Bundle"
+      - event: "event Burn(address indexed owner, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount, uint256 amount0, uint256 amount1)"
+        requiredEntities:
+          - name: "Pool"
+          - name: "Token"
+          - name: "Bundle"
 networks:
   - id: 1 # Ethereum
     start_block: 16955547 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F one from pancakeswap: 16950686
