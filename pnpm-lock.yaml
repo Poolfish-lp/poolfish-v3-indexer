@@ -26,6 +26,9 @@ importers:
       ts-node:
         specifier: 10.9.1
         version: 10.9.1(@types/node@20.8.8)(typescript@5.2.2)
+      viem:
+        specifier: 1.16.6
+        version: 1.16.6(typescript@5.2.2)
     devDependencies:
       '@types/node':
         specifier: 20.8.8

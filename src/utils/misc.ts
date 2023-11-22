@@ -4,6 +4,9 @@
 import bigInt, { BigInteger } from 'big-integer'
 import { ONE_BI, ZERO_BI, ZERO_BD /*, ONE_BD*/ } from '../constants'
 import Big from 'big.js'
+import { Hash, createPublicClient, http } from 'viem'
+import { mainnet } from 'viem/chains'
+import poolAbi from '../../abis/pool.json'
 
 export function exponentToBig(decimals: BigInt): Big {
     let bd = new Big(1)
@@ -114,3 +117,35 @@ export function convertTokenToDecimal(
 //   transaction.save();
 //   return transaction as Transaction;
 // }
+
+export function getClient() {
+    const transport = http(
+        'https://rpc.ankr.com/eth/8d7bb95e5244583f1ca906aa42e9009af099d263ec4baab64f36591637c2f707',
+    )
+    return createPublicClient({
+        chain: mainnet,
+        transport: transport,
+    })
+}
+
+export async function getFeeGrowthGlobal0X128(
+    poolAddress: Hash,
+): Promise<BigInt> {
+    const data = await getClient().readContract({
+        address: poolAddress,
+        abi: poolAbi,
+        functionName: 'feeGrowthGlobal0X128',
+    })
+    return data as BigInt
+}
+
+export async function getFeeGrowthGlobal1X128(
+    poolAddress: Hash,
+): Promise<BigInt> {
+    const data = await getClient().readContract({
+        address: poolAddress,
+        abi: poolAbi,
+        functionName: 'feeGrowthGlobal1X128',
+    })
+    return data as BigInt
+}

@@ -13,13 +13,20 @@ import { PoolEntity, TokenEntity } from '../generated/src/Types.gen'
 import { NATIVE_PRICE_POOL, ONE_BI, ZERO_BD, ZERO_BI } from './constants'
 import { getPoolAddressToInfo } from './utils/getPoolAddressToInfo'
 import bigInt, { BigInteger } from 'big-integer'
-import { convertTokenToDecimal, safeDiv } from './utils/misc'
+import {
+    convertTokenToDecimal,
+    getFeeGrowthGlobal0X128,
+    getFeeGrowthGlobal1X128,
+    safeDiv,
+} from './utils/misc'
 import Big from 'big.js'
 import {
     getEthPriceInUSD,
     getTrackedAmountUSD,
     sqrtPriceX96ToTokenPrices,
 } from './utils/pricing'
+import { get } from 'http'
+import { Hash } from 'viem'
 
 // event Initialize(uint160 sqrtPriceX96, int24 tick)
 PoolContract_Initialize_loader(({ event, context }) => {
@@ -302,7 +309,7 @@ PoolContract_Swap_loader(({ event, context }) => {
     context.Bundle.load('1')
 })
 
-PoolContract_Swap_handler(({ event, context }) => {
+PoolContract_Swap_handler(async ({ event, context }) => {
     const poolInfo = getPoolAddressToInfo(event.srcAddress)
     if (!poolInfo) {
         return
@@ -394,7 +401,14 @@ PoolContract_Swap_handler(({ event, context }) => {
             .toString(),
         token0Price: prices[0].toString(),
         token1Price: prices[1].toString(),
+        feeGrowthGlobal0X128: BigInt(
+            (await getFeeGrowthGlobal0X128(pool.id as Hash)).toString(),
+        ),
+        feeGrowthGlobal1X128: BigInt(
+            (await getFeeGrowthGlobal1X128(pool.id as Hash)).toString(),
+        ),
     }
+    context.log.info('feeGrowth: ' + poolObject.feeGrowthGlobal0X128.toString())
 
     context.Pool.set(poolObject)
 
@@ -445,12 +459,4 @@ PoolContract_Swap_handler(({ event, context }) => {
     //TODO: finish making this work
     // token0.derivedETH = findEthPerToken(token0 as Token)
     // token1.derivedETH = findEthPerToken(token1 as Token)
-
-    //TODO: pull data directly from the contract
-    // update fee growth
-    //   let poolContract = PoolABI.bind(event.address)
-    //   let feeGrowthGlobal0X128 = poolContract.feeGrowthGlobal0X128()
-    //   let feeGrowthGlobal1X128 = poolContract.feeGrowthGlobal1X128()
-    //   pool.feeGrowthGlobal0X128 = feeGrowthGlobal0X128 as BigInt
-    //   pool.feeGrowthGlobal1X128 = feeGrowthGlobal1X128 as BigInt
 })
