@@ -456,7 +456,7 @@ PoolContract_Swap_handler(async ({ event, context }) => {
     }
     context.Bundle.set(bundleObject)
 
-    //TODO: finish making this work
+    // TODO: finish making this work
     // token0.derivedETH = findEthPerToken(token0 as Token)
     // token1.derivedETH = findEthPerToken(token1 as Token)
 })
