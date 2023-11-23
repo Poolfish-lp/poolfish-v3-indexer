@@ -35,8 +35,8 @@ PoolContract_Initialize_loader(({ event, context }) => {
 
     context.Pool.load(NATIVE_PRICE_POOL, {
         loaders: {
-            loadToken0: true,
-            loadToken1: true,
+            loadToken0: {},
+            loadToken1: {},
         },
     })
 })
@@ -79,12 +79,12 @@ PoolContract_Mint_loader(({ event, context }) => {
     }
     context.Pool.load(poolAddress, {
         loaders: {
-            loadToken0: true,
-            loadToken1: true,
+            loadToken0: {},
+            loadToken1: {},
         },
     })
-    context.Token.load(poolInfo.token0.id)
-    context.Token.load(poolInfo.token1.id)
+    context.Token.load(poolInfo.token0.id, {})
+    context.Token.load(poolInfo.token1.id, {})
 
     context.Bundle.load('1')
 })
@@ -189,12 +189,12 @@ PoolContract_Burn_loader(({ event, context }) => {
     }
     context.Pool.load(poolAddress, {
         loaders: {
-            loadToken0: true,
-            loadToken1: true,
+            loadToken0: {},
+            loadToken1: {},
         },
     })
-    context.Token.load(poolInfo.token0.id)
-    context.Token.load(poolInfo.token1.id)
+    context.Token.load(poolInfo.token0.id, {})
+    context.Token.load(poolInfo.token1.id, {})
 
     context.Bundle.load('1')
 })
@@ -299,12 +299,12 @@ PoolContract_Swap_loader(({ event, context }) => {
     }
     context.Pool.load(poolAddress, {
         loaders: {
-            loadToken0: true,
-            loadToken1: true,
+            loadToken0: {},
+            loadToken1: {},
         },
     })
-    context.Token.load(poolInfo.token0.id)
-    context.Token.load(poolInfo.token1.id)
+    context.Token.load(poolInfo.token0.id, {})
+    context.Token.load(poolInfo.token1.id, {})
 
     context.Bundle.load('1')
 })

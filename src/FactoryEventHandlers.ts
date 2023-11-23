@@ -79,6 +79,7 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
         totalValueLockedUSDUntracked: ZERO_BD,
         txCount: ZERO_BI,
         poolCount: ZERO_BI,
+        whitelistPools: [],
     }
     context.Token.set(token0Object)
 
@@ -98,6 +99,7 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
         totalValueLockedUSDUntracked: ZERO_BD,
         txCount: ZERO_BI,
         poolCount: ZERO_BI,
+        whitelistPools: [],
     }
     context.Token.set(token1Object)
 
