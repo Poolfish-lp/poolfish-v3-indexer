@@ -2,14 +2,14 @@
 // import { BigInt, BigDecimal, ethereum } from "@graphprotocol/graph-ts";
 // import { Transaction } from "../../generated/schema";
 import bigInt, { BigInteger } from 'big-integer'
-import { ONE_BI, ZERO_BI, ZERO_BD /*, ONE_BD*/ } from '../constants'
+import { ONE_BI, ZERO_BI, ZERO_BD, ONE_BD } from '../constants'
 import Big from 'big.js'
 import { Hash, createPublicClient, http } from 'viem'
 import { mainnet } from 'viem/chains'
 import poolAbi from '../../abis/pool.json'
 
 export function exponentToBig(decimals: BigInt): Big {
-    let bd = new Big(1)
+    let bd = ONE_BD
     for (
         let i = bigInt(ZERO_BI);
         bigInt(i).lt(bigInt(decimals.toString()));
@@ -24,7 +24,7 @@ export function exponentToBig(decimals: BigInt): Big {
 // // return 0 if denominator is 0 in division
 export function safeDiv(amount0: Big, amount1: Big): Big {
     if (amount1.eq(ZERO_BD)) {
-        return new Big(ZERO_BD)
+        return ZERO_BD
     } else {
         return amount0.div(amount1)
     }

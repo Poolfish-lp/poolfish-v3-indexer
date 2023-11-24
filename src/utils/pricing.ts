@@ -61,7 +61,6 @@ export function getEthPriceInUSD(nativeAndStablePool: PoolEntity): string {
 export function findEthPerToken(
     token: TokenEntity,
     getWhitelistPools: (_token: TokenEntity) => PoolEntity[],
-    // pool: PoolEntity,
     getToken0: (_pool: PoolEntity) => TokenEntity,
     getToken1: (_pool: PoolEntity) => TokenEntity,
     bundle: BundleEntity,
@@ -74,12 +73,12 @@ export function findEthPerToken(
     // for now just take USD from pool with greatest TVL
     // need to update this to actually detect best rate based on liquidity distribution
     let largestLiquidityETH = ZERO_BD
-    let priceSoFar = new Big(ZERO_BD)
+    let priceSoFar = ZERO_BD
 
     // hardcoded fix for incorrect rates
     // if whitelist includes token - get the safe price
     if (STABLE_TOKEN_ADDRESSES.includes(token.id)) {
-        priceSoFar = safeDiv(new Big(ONE_BD), new Big(bundle.ethPriceUSD))
+        priceSoFar = safeDiv(ONE_BD, new Big(bundle.ethPriceUSD))
     } else {
         for (let i = 0; i < whiteList.length; ++i) {
             let pool = whiteList[i]
@@ -123,8 +122,7 @@ export function findEthPerToken(
             }
         }
     }
-    // return priceSoFar // nothing was found return 0
-    return new Big(ONE_BD) /// Just while debugging
+    return priceSoFar // nothing was found return 0
 }
 
 /**
