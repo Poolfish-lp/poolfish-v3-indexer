@@ -61,7 +61,6 @@ export function getEthPriceInUSD(nativeAndStablePool: PoolEntity): string {
 export function findEthPerToken(
     token: TokenEntity,
     getWhitelistPools: (_token: TokenEntity) => PoolEntity[],
-    // pool: PoolEntity,
     getToken0: (_pool: PoolEntity) => TokenEntity,
     getToken1: (_pool: PoolEntity) => TokenEntity,
     bundle: BundleEntity,

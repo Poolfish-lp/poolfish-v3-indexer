@@ -28,8 +28,9 @@ contracts:
       - event: "event Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)"
         requiredEntities:
           - name: "Pool"
-          - name: "Token"
+            labels: ["swapPool"]
           - name: "Bundle"
+            labels: ["bundle"]
 networks:
   - id: 1 # Ethereum
     start_block: 16955547 # The deployment block https://etherscan.io/address/0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F one from pancakeswap: 16950686
