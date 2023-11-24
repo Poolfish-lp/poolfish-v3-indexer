@@ -21,6 +21,7 @@ import {
 } from './utils/misc'
 import Big from 'big.js'
 import {
+    findEthPerToken,
     getEthPriceInUSD,
     getTrackedAmountUSD,
     sqrtPriceX96ToTokenPrices,
@@ -295,39 +296,40 @@ PoolContract_Swap_loader(({ event, context }) => {
     let poolAddress = event.srcAddress
     const poolInfo = getPoolAddressToInfo(poolAddress)
     if (!poolInfo) {
-        return
+        return // not a pool we care about
     }
-    context.Pool.load(poolAddress, {
+
+    context.Pool.swapPoolLoad(poolAddress, {
         loaders: {
-            loadToken0: {},
-            loadToken1: {},
+            loadToken0: {
+                loadWhitelistPools: { loadToken0: {}, loadToken1: {} },
+            },
+            loadToken1: {
+                loadWhitelistPools: { loadToken0: {}, loadToken1: {} },
+            },
         },
     })
-    context.Token.load(poolInfo.token0.id, {})
-    context.Token.load(poolInfo.token1.id, {})
 
-    context.Bundle.load('1')
+    context.Bundle.bundleLoad('1')
 })
 
 PoolContract_Swap_handler(async ({ event, context }) => {
-    const poolInfo = getPoolAddressToInfo(event.srcAddress)
-    if (!poolInfo) {
-        return
-    }
-
-    let pool = context.Pool.get(event.srcAddress)
-
+    let {
+        Pool: { swapPool: pool, getToken0, getToken1 },
+        Bundle: { bundle },
+        Token: { getWhitelistPools },
+    } = context
     if (!pool) {
         // context.log.info("no pool for this mint: " + event.srcAddress);
         return
     }
-    const bundle = context.Bundle.get('1')
     if (!bundle) {
         return
     }
 
-    let token0 = context.Token.get(pool.token0)
-    let token1 = context.Token.get(pool.token1)
+    let token0 = getToken0(pool)
+    let token1 = getToken1(pool)
+
     if (!token0 || !token1) {
         // context.log.error("no token0 or token1 for this mint: " + event.srcAddress);
         return
@@ -428,12 +430,19 @@ PoolContract_Swap_handler(async ({ event, context }) => {
             .toString(),
         feesUSD: new Big(token0.feesUSD).plus(feesUSD).toString(),
         txCount: BigInt(bigInt(token0.txCount).plus(ONE_BI).toString()),
+        derivedETH: findEthPerToken(
+            token1,
+            getWhitelistPools,
+            getToken0,
+            getToken1,
+            bundle,
+        ).toString(),
     }
     context.Token.set(token0Object)
 
     // update token1 data
     let token1Object: TokenEntity = {
-        ...token0,
+        ...token1,
         volume: new Big(token1.volume).plus(amount1Abs).toString(),
         totalValueLocked: new Big(token1.totalValueLocked)
             .plus(amount1)
@@ -446,17 +455,21 @@ PoolContract_Swap_handler(async ({ event, context }) => {
             .toString(),
         feesUSD: new Big(token1.feesUSD).plus(feesUSD).toString(),
         txCount: BigInt(bigInt(token1.txCount).plus(ONE_BI).toString()),
+        derivedETH: findEthPerToken(
+            token1,
+            getWhitelistPools,
+            getToken0,
+            getToken1,
+            bundle,
+        ).toString(),
     }
     context.Token.set(token1Object)
 
     // update USD pricing
     let bundleObject = {
-        id: '1',
+        ...bundle,
         ethPriceUSD: getEthPriceInUSD(poolObject),
     }
-    context.Bundle.set(bundleObject)
 
-    // TODO: finish making this work
-    // token0.derivedETH = findEthPerToken(token0 as Token)
-    // token1.derivedETH = findEthPerToken(token1 as Token)
+    context.Bundle.set(bundleObject)
 })
