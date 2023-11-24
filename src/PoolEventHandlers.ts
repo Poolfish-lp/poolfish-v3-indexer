@@ -9,7 +9,7 @@ import {
     PoolContract_Swap_handler,
 } from '../generated/src/Handlers.gen'
 
-import { PoolEntity, TokenEntity } from '../generated/src/Types.gen'
+import { PoolEntity, TickEntity, TokenEntity } from '../generated/src/Types.gen'
 import { NATIVE_PRICE_POOL, ONE_BI, ZERO_BD, ZERO_BI } from './constants'
 import { getPoolAddressToInfo } from './utils/getPoolAddressToInfo'
 import bigInt, { BigInteger } from 'big-integer'
@@ -27,6 +27,12 @@ import {
 } from './utils/pricing'
 import { get } from 'http'
 import { Hash } from 'viem'
+import {
+    createTick,
+    feeTierToTickSpacing,
+    loadTickUpdateFeeVarsAndSave,
+    updateTickFeeVarsAndSave,
+} from './utils/tick'
 
 // event Initialize(uint160 sqrtPriceX96, int24 tick)
 PoolContract_Initialize_loader(({ event, context }) => {
@@ -87,9 +93,21 @@ PoolContract_Mint_loader(({ event, context }) => {
     context.Token.load(poolInfo.token1.id)
 
     context.Bundle.load('1')
+
+    let lowerTickId =
+        poolAddress + '#' + BigInt(event.params.tickLower).toString()
+    let upperTickId =
+        poolAddress + '#' + BigInt(event.params.tickUpper).toString()
+    context.Tick.load(lowerTickId, {
+        loaders: { loadPool: { loadToken0: true } },
+    })
+    context.Tick.load(upperTickId, {
+        loaders: { loadPool: { loadToken0: true } },
+    })
 })
 
 PoolContract_Mint_handler(({ event, context }) => {
+    let poolAddress = event.srcAddress
     const poolInfo = getPoolAddressToInfo(event.srcAddress)
     if (!poolInfo) {
         return
@@ -179,6 +197,68 @@ PoolContract_Mint_handler(({ event, context }) => {
             .toString(),
     }
     context.Pool.set(poolObject)
+
+    // tick entities
+    let lowerTickIdx = event.params.tickLower
+    let upperTickIdx = event.params.tickUpper
+
+    let lowerTickId = poolAddress + '#' + BigInt(lowerTickIdx).toString()
+    let upperTickId = poolAddress + '#' + BigInt(upperTickIdx).toString()
+    let lowerTick = context.Tick.get(lowerTickId)
+    let upperTick = context.Tick.get(upperTickId)
+    context.log.info('lowerTick: ' + lowerTick)
+
+    if (!lowerTick) {
+        lowerTick = createTick(lowerTickId, lowerTickIdx, pool.id, event)
+        context.log.info('created tick: ' + lowerTick.id)
+        context.Tick.set(lowerTick)
+    }
+
+    if (!upperTick) {
+        upperTick = createTick(upperTickId, upperTickIdx, pool.id, event)
+        context.log.info('created tick: ' + upperTick.id)
+        context.Tick.set(upperTick)
+    }
+
+    let amount = event.params.amount
+    if (lowerTick?.liquidityGross) {
+        const updatedLowerTick: TickEntity = {
+            ...lowerTick,
+            liquidityGross: BigInt(
+                bigInt(lowerTick?.liquidityGross?.toString())
+                    .plus(amount)
+                    .toString(),
+            ),
+            liquidityNet: BigInt(
+                bigInt(lowerTick?.liquidityNet?.toString())
+                    .plus(amount)
+                    .toString(),
+            ),
+        }
+        lowerTick = updatedLowerTick
+        context.Tick.set(updatedLowerTick)
+    }
+    if (upperTick?.liquidityGross) {
+        const updatedUpperTick: TickEntity = {
+            ...upperTick,
+            liquidityGross: BigInt(
+                bigInt(upperTick?.liquidityGross?.toString())
+                    .plus(amount)
+                    .toString(),
+            ),
+            liquidityNet: BigInt(
+                bigInt(upperTick?.liquidityNet?.toString())
+                    .plus(amount)
+                    .toString(),
+            ),
+        }
+        upperTick = updatedUpperTick
+        context.Tick.set(updatedUpperTick)
+    }
+
+    // Update inner tick vars and save the ticks
+    updateTickFeeVarsAndSave(context, lowerTick!, event)
+    updateTickFeeVarsAndSave(context, upperTick!, event)
 })
 
 PoolContract_Burn_loader(({ event, context }) => {
@@ -197,9 +277,21 @@ PoolContract_Burn_loader(({ event, context }) => {
     context.Token.load(poolInfo.token1.id)
 
     context.Bundle.load('1')
+
+    let lowerTickId =
+        poolAddress + '#' + BigInt(event.params.tickLower).toString()
+    let upperTickId =
+        poolAddress + '#' + BigInt(event.params.tickUpper).toString()
+    context.Tick.load(lowerTickId, {
+        loaders: { loadPool: { loadToken0: true } },
+    })
+    context.Tick.load(upperTickId, {
+        loaders: { loadPool: { loadToken0: true } },
+    })
 })
 
 PoolContract_Burn_handler(({ event, context }) => {
+    const poolAddress = event.srcAddress
     const poolInfo = getPoolAddressToInfo(event.srcAddress)
     if (!poolInfo) {
         return
@@ -289,6 +381,53 @@ PoolContract_Burn_handler(({ event, context }) => {
             .toString(),
     }
     context.Pool.set(poolObject)
+
+    // tick entities
+    let lowerTickId =
+        poolAddress + '#' + BigInt(event.params.tickLower).toString()
+    let upperTickId =
+        poolAddress + '#' + BigInt(event.params.tickUpper).toString()
+    let lowerTick = context.Tick.get(lowerTickId)
+    let upperTick = context.Tick.get(upperTickId)
+    let amount = event.params.amount
+    if (lowerTick?.liquidityGross) {
+        const updatedLowerTick: TickEntity = {
+            ...lowerTick,
+            liquidityGross: BigInt(
+                bigInt(lowerTick?.liquidityGross?.toString())
+                    .minus(amount)
+                    .toString(),
+            ),
+            liquidityNet: BigInt(
+                bigInt(lowerTick?.liquidityNet?.toString())
+                    .minus(amount)
+                    .toString(),
+            ),
+        }
+        lowerTick = updatedLowerTick
+        context.Tick.set(updatedLowerTick)
+    }
+    if (upperTick?.liquidityGross) {
+        const updatedUpperTick: TickEntity = {
+            ...upperTick,
+            liquidityGross: BigInt(
+                bigInt(upperTick?.liquidityGross?.toString())
+                    .minus(amount)
+                    .toString(),
+            ),
+            liquidityNet: BigInt(
+                bigInt(upperTick?.liquidityNet?.toString())
+                    .plus(amount)
+                    .toString(),
+            ),
+        }
+        upperTick = updatedUpperTick
+        context.Tick.set(updatedUpperTick)
+    }
+
+    // Update inner tick vars and save the ticks
+    updateTickFeeVarsAndSave(context, lowerTick!, event)
+    updateTickFeeVarsAndSave(context, upperTick!, event)
 })
 
 PoolContract_Swap_loader(({ event, context }) => {
@@ -459,4 +598,49 @@ PoolContract_Swap_handler(async ({ event, context }) => {
     // TODO: finish making this work
     // token0.derivedETH = findEthPerToken(token0 as Token)
     // token1.derivedETH = findEthPerToken(token1 as Token)
+
+    // Update inner vars of current or crossed ticks
+    let newTick = pool.tick!
+    let tickSpacing = feeTierToTickSpacing(pool.feeTier)
+    let modulo = bigInt(newTick).mod(tickSpacing.toString())
+    if (modulo.equals(ZERO_BI)) {
+        // Current tick is initialized and needs to be updated
+        //TODO: get this working
+        // loadTickUpdateFeeVarsAndSave(context, newTick.toString(), event)
+    }
+
+    let numIters = bigInt(oldTick)
+        .minus(newTick)
+        .abs()
+        .divide(tickSpacing.toString())
+
+    if (numIters.gt(BigInt(100))) {
+        // In case more than 100 ticks need to be updated ignore the update in
+        // order to avoid timeouts. From testing this behavior occurs only upon
+        // pool initialization. This should not be a big issue as the ticks get
+        // updated later. For early users this error also disappears when calling
+        // collect
+    } else if (bigInt(newTick).gt(oldTick)) {
+        let firstInitialized = bigInt(oldTick).plus(
+            bigInt(tickSpacing.toString()).minus(modulo),
+        )
+        for (
+            let i = firstInitialized;
+            i.leq(newTick);
+            i = i.plus(tickSpacing.toString())
+        ) {
+            //TODO: get this working
+            // loadTickUpdateFeeVarsAndSave(context, i.toString(), event)
+        }
+    } else if (bigInt(newTick).lt(oldTick)) {
+        let firstInitialized = bigInt(oldTick).minus(modulo)
+        for (
+            let i = firstInitialized;
+            i.geq(newTick);
+            i = i.minus(tickSpacing.toString())
+        ) {
+            //TODO: get this working
+            // loadTickUpdateFeeVarsAndSave(context, i.toString(), event)
+        }
+    }
 })

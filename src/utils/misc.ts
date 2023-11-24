@@ -131,6 +131,7 @@ export function getClient() {
 export async function getFeeGrowthGlobal0X128(
     poolAddress: Hash,
 ): Promise<BigInt> {
+    //TODO: probably need to read this from a specific block number
     const data = await getClient().readContract({
         address: poolAddress,
         abi: poolAbi,
