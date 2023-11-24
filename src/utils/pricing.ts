@@ -2,6 +2,7 @@
 import bigInt from 'big-integer'
 import {
     BundleEntity,
+    PoolContract_InitializeEvent_poolEntityHandlerContext,
     PoolEntity,
     TokenEntity,
 } from '../../generated/src/Types.gen'
@@ -10,7 +11,10 @@ import {
     NATIVE_ADDRESS,
     NATIVE_PRICE_POOL,
     ONE_BD,
+    STABLE_TOKEN_ADDRESSES,
     ZERO_BD,
+    ZERO_BD_STR,
+    ZERO_BI,
 } from '../constants'
 import Big from 'big.js'
 import { exponentToBig, safeDiv } from './misc'
@@ -46,7 +50,7 @@ export function getEthPriceInUSD(nativeAndStablePool: PoolEntity): string {
             ? nativeAndStablePool.token1Price
             : nativeAndStablePool.token0Price
     } else {
-        return ZERO_BD
+        return ZERO_BD_STR
     }
 }
 
@@ -54,69 +58,74 @@ export function getEthPriceInUSD(nativeAndStablePool: PoolEntity): string {
  * Search through graph to find derived Eth per token.
  * @todo update to be derived ETH (add stablecoin estimates)
  **/
-// export function findEthPerToken(
-//     token: TokenEntity,
-//     pool: PoolEntity,
-//     bundle: BundleEntity,
-// ): Big {
-//     if (token.id == NATIVE_ADDRESS.toLowerCase()) {
-//         return new Big(ONE_BD)
-//     }
-//     let whiteList = token.whitelistPools
-//     // for now just take USD from pool with greatest TVL
-//     // need to update this to actually detect best rate based on liquidity distribution
-//     let largestLiquidityETH = ZERO_BD
-//     let priceSoFar = new Big(ZERO_BD)
+export function findEthPerToken(
+    token: TokenEntity,
+    getWhitelistPools: (_token: TokenEntity) => PoolEntity[],
+    // pool: PoolEntity,
+    getToken0: (_pool: PoolEntity) => TokenEntity,
+    getToken1: (_pool: PoolEntity) => TokenEntity,
+    bundle: BundleEntity,
+): Big {
+    if (token.id == NATIVE_ADDRESS.toLowerCase()) {
+        return new Big(ONE_BD)
+    }
+    let whiteList = getWhitelistPools(token)
 
-//     // hardcoded fix for incorrect rates
-//     // if whitelist includes token - get the safe price
-//     if (STABLE_TOKEN_ADDRESSES.includes(token.id)) {
-//         priceSoFar = safeDiv(new Big(ONE_BD), new Big(bundle.ethPriceUSD))
-//     } else {
-//         for (let i = 0; i < whiteList.length; ++i) {
-//             let poolAddress = whiteList[i]
+    // for now just take USD from pool with greatest TVL
+    // need to update this to actually detect best rate based on liquidity distribution
+    let largestLiquidityETH = ZERO_BD
+    let priceSoFar = new Big(ZERO_BD)
 
-//             if (pool.liquidity.gt(ZERO_BI)) {
-//                 if (pool.token0 == token.id) {
-//                     // whitelist token is token1
-//                     let token1 = Token.load(pool.token1) as Token
-//                     // get the derived ETH in pool
-//                     let ethLocked = pool.totalValueLockedToken1.times(
-//                         token1.derivedETH,
-//                     )
-//                     if (
-//                         ethLocked.gt(largestLiquidityETH) &&
-//                         ethLocked.gt(MINIMUM_ETH_LOCKED)
-//                     ) {
-//                         largestLiquidityETH = ethLocked
-//                         // token1 per our token * Eth per token1
-//                         priceSoFar = pool.token1Price.times(
-//                             token1.derivedETH as BigDecimal,
-//                         )
-//                     }
-//                 }
-//                 if (pool.token1 == token.id) {
-//                     let token0 = Token.load(pool.token0) as Token
-//                     // get the derived ETH in pool
-//                     let ethLocked = pool.totalValueLockedToken0.times(
-//                         token0.derivedETH,
-//                     )
-//                     if (
-//                         ethLocked.gt(largestLiquidityETH) &&
-//                         ethLocked.gt(MINIMUM_ETH_LOCKED)
-//                     ) {
-//                         largestLiquidityETH = ethLocked
-//                         // token0 per our token * ETH per token0
-//                         priceSoFar = pool.token0Price.times(
-//                             token0.derivedETH as BigDecimal,
-//                         )
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     return priceSoFar // nothing was found return 0
-// }
+    // hardcoded fix for incorrect rates
+    // if whitelist includes token - get the safe price
+    if (STABLE_TOKEN_ADDRESSES.includes(token.id)) {
+        priceSoFar = safeDiv(new Big(ONE_BD), new Big(bundle.ethPriceUSD))
+    } else {
+        for (let i = 0; i < whiteList.length; ++i) {
+            let pool = whiteList[i]
+
+            if (pool.liquidity > ZERO_BI) {
+                if (pool.token0 == token.id) {
+                    // whitelist token is token1
+                    let token1 = getToken1(pool)
+                    // get the derived ETH in pool
+                    let ethLocked = new Big(pool.totalValueLockedToken1).times(
+                        token1.derivedETH, // this is a string, but 'Big' seems to handle it.
+                    )
+                    if (
+                        ethLocked.gt(largestLiquidityETH) &&
+                        ethLocked.gt(MINIMUM_ETH_LOCKED)
+                    ) {
+                        largestLiquidityETH = ethLocked
+                        // token1 per our token * Eth per token1
+                        priceSoFar = Big(pool.token1Price).times(
+                            token1.derivedETH,
+                        )
+                    }
+                }
+                if (pool.token1 == token.id) {
+                    let token0 = getToken0(pool)
+                    // get the derived ETH in pool
+                    let ethLocked = Big(pool.totalValueLockedToken0).times(
+                        token0.derivedETH,
+                    )
+                    if (
+                        ethLocked.gt(largestLiquidityETH) &&
+                        ethLocked.gt(MINIMUM_ETH_LOCKED)
+                    ) {
+                        largestLiquidityETH = ethLocked
+                        // token0 per our token * ETH per token0
+                        priceSoFar = Big(pool.token0Price).times(
+                            token0.derivedETH,
+                        )
+                    }
+                }
+            }
+        }
+    }
+    // return priceSoFar // nothing was found return 0
+    return new Big(ONE_BD) /// Just while debugging
+}
 
 /**
  * Accepts tokens and amounts, return tracked amount based on token whitelist

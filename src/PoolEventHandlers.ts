@@ -21,6 +21,7 @@ import {
 } from './utils/misc'
 import Big from 'big.js'
 import {
+    findEthPerToken,
     getEthPriceInUSD,
     getTrackedAmountUSD,
     sqrtPriceX96ToTokenPrices,
@@ -428,12 +429,19 @@ PoolContract_Swap_handler(async ({ event, context }) => {
             .toString(),
         feesUSD: new Big(token0.feesUSD).plus(feesUSD).toString(),
         txCount: BigInt(bigInt(token0.txCount).plus(ONE_BI).toString()),
+        derivedETH: findEthPerToken(
+            token1,
+            context.Token.getWhitelistPools,
+            context.Pool.getToken0,
+            context.Pool.getToken1,
+            bundle,
+        ).toString(),
     }
     context.Token.set(token0Object)
 
     // update token1 data
     let token1Object: TokenEntity = {
-        ...token0,
+        ...token1,
         volume: new Big(token1.volume).plus(amount1Abs).toString(),
         totalValueLocked: new Big(token1.totalValueLocked)
             .plus(amount1)
@@ -446,17 +454,21 @@ PoolContract_Swap_handler(async ({ event, context }) => {
             .toString(),
         feesUSD: new Big(token1.feesUSD).plus(feesUSD).toString(),
         txCount: BigInt(bigInt(token1.txCount).plus(ONE_BI).toString()),
+        derivedETH: findEthPerToken(
+            token1,
+            context.Token.getWhitelistPools,
+            context.Pool.getToken0,
+            context.Pool.getToken1,
+            bundle,
+        ).toString(),
     }
     context.Token.set(token1Object)
 
     // update USD pricing
     let bundleObject = {
-        id: '1',
+        ...bundle,
         ethPriceUSD: getEthPriceInUSD(poolObject),
     }
-    context.Bundle.set(bundleObject)
 
-    // TODO: finish making this work
-    // token0.derivedETH = findEthPerToken(token0 as Token)
-    // token1.derivedETH = findEthPerToken(token1 as Token)
+    context.Bundle.set(bundleObject)
 })

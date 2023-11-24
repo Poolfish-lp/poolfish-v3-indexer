@@ -8,7 +8,7 @@ import {
     PoolEntity,
     TokenEntity,
 } from '../generated/src/Types.gen'
-import { ZERO_BD, ZERO_BI } from './constants'
+import { ZERO_BD, ZERO_BD_STR, ZERO_BI } from './constants'
 import { addressToDex } from './utils/addressToDex'
 import { getPoolAddressToInfo } from './utils/getPoolAddressToInfo'
 
@@ -43,7 +43,7 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
 
         let bundleObject = {
             id: '1',
-            ethPriceUSD: ZERO_BD,
+            ethPriceUSD: ZERO_BD_STR,
         }
         context.Bundle.set(bundleObject)
     } else {
@@ -69,14 +69,14 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
         name: poolInfo.token0.name, //fetchTokenName(event.params.token0),
         totalSupply: BigInt(poolInfo.token0.totalSupply), //fetchTokenTotalSupply(event.params.token0),
         decimals: BigInt(poolInfo.token0.decimals),
-        derivedETH: ZERO_BD,
-        volume: ZERO_BD,
-        volumeUSD: ZERO_BD,
-        feesUSD: ZERO_BD,
-        untrackedVolumeUSD: ZERO_BD,
-        totalValueLocked: ZERO_BD,
-        totalValueLockedUSD: ZERO_BD,
-        totalValueLockedUSDUntracked: ZERO_BD,
+        derivedETH: ZERO_BD_STR,
+        volume: ZERO_BD_STR,
+        volumeUSD: ZERO_BD_STR,
+        feesUSD: ZERO_BD_STR,
+        untrackedVolumeUSD: ZERO_BD_STR,
+        totalValueLocked: ZERO_BD_STR,
+        totalValueLockedUSD: ZERO_BD_STR,
+        totalValueLockedUSDUntracked: ZERO_BD_STR,
         txCount: ZERO_BI,
         poolCount: ZERO_BI,
         whitelistPools: [],
@@ -89,14 +89,14 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
         name: poolInfo.token1.name, //fetchTokenName(event.params.token0),
         totalSupply: BigInt(poolInfo.token1.totalSupply), //fetchTokenTotalSupply(event.params.token0),
         decimals: BigInt(poolInfo.token1.decimals),
-        derivedETH: ZERO_BD,
-        volume: ZERO_BD,
-        volumeUSD: ZERO_BD,
-        feesUSD: ZERO_BD,
-        untrackedVolumeUSD: ZERO_BD,
-        totalValueLocked: ZERO_BD,
-        totalValueLockedUSD: ZERO_BD,
-        totalValueLockedUSDUntracked: ZERO_BD,
+        derivedETH: ZERO_BD_STR,
+        volume: ZERO_BD_STR,
+        volumeUSD: ZERO_BD_STR,
+        feesUSD: ZERO_BD_STR,
+        untrackedVolumeUSD: ZERO_BD_STR,
+        totalValueLocked: ZERO_BD_STR,
+        totalValueLockedUSD: ZERO_BD_STR,
+        totalValueLockedUSDUntracked: ZERO_BD_STR,
         txCount: ZERO_BI,
         poolCount: ZERO_BI,
         whitelistPools: [],
@@ -118,23 +118,23 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
         liquidity: ZERO_BI,
         feeGrowthGlobal0X128: ZERO_BI,
         feeGrowthGlobal1X128: ZERO_BI,
-        token0Price: ZERO_BD,
-        token1Price: ZERO_BD,
+        token0Price: ZERO_BD_STR,
+        token1Price: ZERO_BD_STR,
         observationIndex: ZERO_BI,
-        totalValueLockedToken0: ZERO_BD,
-        totalValueLockedToken1: ZERO_BD,
-        totalValueLockedUSD: ZERO_BD,
-        totalValueLockedETH: ZERO_BD,
-        totalValueLockedUSDUntracked: ZERO_BD,
-        volumeToken0: ZERO_BD,
-        volumeToken1: ZERO_BD,
-        volumeUSD: ZERO_BD,
-        feesUSD: ZERO_BD,
-        untrackedVolumeUSD: ZERO_BD,
+        totalValueLockedToken0: ZERO_BD_STR,
+        totalValueLockedToken1: ZERO_BD_STR,
+        totalValueLockedUSD: ZERO_BD_STR,
+        totalValueLockedETH: ZERO_BD_STR,
+        totalValueLockedUSDUntracked: ZERO_BD_STR,
+        volumeToken0: ZERO_BD_STR,
+        volumeToken1: ZERO_BD_STR,
+        volumeUSD: ZERO_BD_STR,
+        feesUSD: ZERO_BD_STR,
+        untrackedVolumeUSD: ZERO_BD_STR,
 
-        collectedFeesToken0: ZERO_BD,
-        collectedFeesToken1: ZERO_BD,
-        collectedFeesUSD: ZERO_BD,
+        collectedFeesToken0: ZERO_BD_STR,
+        collectedFeesToken1: ZERO_BD_STR,
+        collectedFeesUSD: ZERO_BD_STR,
     }
 
     // poolToToken[event.params.pool] = {
