@@ -123,16 +123,22 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
     // update white listed pools
     // I think any pools from subgraph are whitelisted?
     // if (WHITELISTED_TOKEN_ADDRESSES.includes(token0.id)) {
-    const token1ObjectUpdated = {
+    const token1ObjectUpdated: TokenEntity = {
         ...token1Object,
-        whitelistPool: _.concat(token1Object.whitelistPools, event.params.pool),
+        whitelistPools: _.concat(
+            token1Object.whitelistPools,
+            event.params.pool,
+        ),
     }
     context.Token.set(token1ObjectUpdated)
     // }
     // if (WHITELISTED_TOKEN_ADDRESSES.includes(token1.id)) {
-    const token0ObjectUpdated = {
+    const token0ObjectUpdated: TokenEntity = {
         ...token0Object,
-        whitelistPool: _.concat(token0Object.whitelistPools, event.params.pool),
+        whitelistPools: _.concat(
+            token0Object.whitelistPools,
+            event.params.pool,
+        ),
     }
     context.Token.set(token0ObjectUpdated)
     // }
