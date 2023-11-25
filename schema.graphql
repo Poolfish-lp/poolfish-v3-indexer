@@ -145,3 +145,49 @@ type Pool @entity {
     # collects: [Collect!]! @derivedFrom(field: "pool")
     # ticks: [Tick!]! @derivedFrom(field: "pool")
 }
+
+type Tick @entity {
+    # format: <pool address>#<tick index>
+    id: ID!
+    # pool address
+    poolAddress: String
+    # tick index
+    tickIdx: BigInt!
+    # pointer to pool
+    pool: Pool!
+    # total liquidity pool has as tick lower or upper
+    liquidityGross: BigInt!
+    # how much liquidity changes when tick crossed
+    liquidityNet: BigInt!
+    # calculated price of token0 of tick within this pool - constant
+    price0: String!
+    # calculated price of token1 of tick within this pool - constant
+    price1: String!
+    # lifetime volume of token0 with this tick in range
+    volumeToken0: String!
+    # lifetime volume of token1 with this tick in range
+    volumeToken1: String!
+    # lifetime volume in derived USD with this tick in range
+    volumeUSD: String!
+    # lifetime volume in untracked USD with this tick in range
+    untrackedVolumeUSD: String!
+    # fees in USD
+    feesUSD: String!
+    # all time collected fees in token0
+    collectedFeesToken0: String!
+    # all time collected fees in token1
+    collectedFeesToken1: String!
+    # all time collected fees in USD
+    collectedFeesUSD: String!
+    # created time
+    createdAtTimestamp: BigInt!
+    # created block
+    createdAtBlockNumber: BigInt!
+    # Fields used to help derived relationship
+    liquidityProviderCount: BigInt! # used to detect new exchanges
+    # derived fields
+    # swaps: [Swap!]! @derivedFrom(field: "tick")
+    # vars needed for fee computation
+    feeGrowthOutside0X128: BigInt!
+    feeGrowthOutside1X128: BigInt!
+}
