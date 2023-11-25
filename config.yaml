@@ -7,6 +7,7 @@ contracts:
       - event: "event PoolCreated(address indexed token0, address indexed token1, uint24 indexed fee, int24 tickSpacing, address pool)"
         requiredEntities:
           - name: "Factory"
+          - name: "Token"
   - name: Pool
     handler: src/PoolEventHandlers.ts
     events:

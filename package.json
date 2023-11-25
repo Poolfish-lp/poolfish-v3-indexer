@@ -17,9 +17,11 @@
   },
   "dependencies": {
     "@types/big.js": "^6.2.2",
+    "@types/lodash": "^4.14.202",
     "big-integer": "^1.6.51",
     "big.js": "^6.2.1",
     "envio": "0.0.22",
+    "lodash": "^4.17.21",
     "prettier": "^3.1.0",
     "ts-node": "10.9.1",
     "viem": "1.16.6"

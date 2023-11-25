@@ -509,10 +509,10 @@ PoolContract_Swap_handler(async ({ event, context }) => {
 
     let feesETH = amountTotalETHTracked
         .times(new Big(pool.feeTier.toString()))
-        .div(new Big('1000000'))
+        .div('1000000')
     let feesUSD = amountTotalUSDTracked
         .times(new Big(pool.feeTier.toString()))
-        .div(new Big('1000000'))
+        .div('1000000')
 
     // pool volume and rates
     let prices = sqrtPriceX96ToTokenPrices(pool.sqrtPrice, token0, token1)
@@ -571,7 +571,7 @@ PoolContract_Swap_handler(async ({ event, context }) => {
         feesUSD: new Big(token0.feesUSD).plus(feesUSD).toString(),
         txCount: BigInt(bigInt(token0.txCount).plus(ONE_BI).toString()),
         derivedETH: findEthPerToken(
-            token1,
+            token0,
             getWhitelistPools,
             getToken0,
             getToken1,
@@ -611,10 +611,6 @@ PoolContract_Swap_handler(async ({ event, context }) => {
         ethPriceUSD: getEthPriceInUSD(poolObject),
     }
     context.Bundle.set(bundleObject)
-
-    // TODO: finish making this work
-    // token0.derivedETH = findEthPerToken(token0 as Token)
-    // token1.derivedETH = findEthPerToken(token1 as Token)
 
     // Update inner vars of current or crossed ticks
     let newTick = pool.tick!
