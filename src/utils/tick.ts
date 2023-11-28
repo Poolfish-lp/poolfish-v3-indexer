@@ -1,10 +1,10 @@
 /* eslint-disable prefer-const */
 // import { bigDecimalExponated, safeDiv } from './misc'
-import { ONE_BD, ZERO_BD, ZERO_BI } from '../constants'
+import { ONE_BD_STR, ZERO_BD_STR, ZERO_BD, ZERO_BI } from '../constants'
 import { TickEntity } from '../../generated/src/Types.gen'
 import bigInt from 'big-integer'
 import { getClient } from './misc'
-import { poolAbi } from '../../generated/src/Abis.bs'
+import poolAbi from '../../abis/pool.json'
 
 export function createTick(
     tickId: string,
@@ -22,16 +22,16 @@ export function createTick(
         liquidityGross: ZERO_BI,
         liquidityNet: ZERO_BI,
         liquidityProviderCount: ZERO_BI,
-        price0: ONE_BD,
-        price1: ONE_BD,
-        volumeToken0: ZERO_BD,
-        volumeToken1: ZERO_BD,
-        volumeUSD: ZERO_BD,
-        feesUSD: ZERO_BD,
-        untrackedVolumeUSD: ZERO_BD,
-        collectedFeesToken0: ZERO_BD,
-        collectedFeesToken1: ZERO_BD,
-        collectedFeesUSD: ZERO_BD,
+        price0: ONE_BD_STR,
+        price1: ONE_BD_STR,
+        volumeToken0: ZERO_BD_STR,
+        volumeToken1: ZERO_BD_STR,
+        volumeUSD: ZERO_BD_STR,
+        feesUSD: ZERO_BD_STR,
+        untrackedVolumeUSD: ZERO_BD_STR,
+        collectedFeesToken0: ZERO_BD_STR,
+        collectedFeesToken1: ZERO_BD_STR,
+        collectedFeesUSD: ZERO_BD_STR,
         feeGrowthOutside0X128: ZERO_BI,
         feeGrowthOutside1X128: ZERO_BI,
     }
@@ -64,19 +64,19 @@ export async function updateTickFeeVarsAndSave(
 ): Promise<void> {
     let poolAddress = event.address
     // not all ticks are initialized so obtaining null is expected behavior
-    const tickResult: any = await getClient().readContract({
-        address: poolAddress,
-        abi: poolAbi,
-        functionName: 'ticks',
-        args: [tick.tickIdx],
-    })
-    // let tickResult = poolContract.ticks(tick.tickIdx)
-    const tickObject: TickEntity = {
-        ...tick,
-        feeGrowthOutside0X128: tickResult?.value2,
-        feeGrowthOutside1X128: tickResult?.value3,
-    }
-    context.Tick.set(tickObject)
+    //TODO uncomment this section
+    // const tickResult: any = await getClient().readContract({
+    //     address: poolAddress,
+    //     abi: poolAbi,
+    //     functionName: 'ticks',
+    //     args: [tick.tickIdx],
+    // })
+    // const tickObject: TickEntity = {
+    //     ...tick,
+    //     feeGrowthOutside0X128: tickResult?.value2,
+    //     feeGrowthOutside1X128: tickResult?.value3,
+    // }
+    // context.Tick.set(tickObject)
 
     // We aren't using tickdaydata currently
     // let timestamp = BigInt(event.block.timestamp)

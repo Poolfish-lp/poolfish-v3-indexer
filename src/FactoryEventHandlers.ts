@@ -8,9 +8,10 @@ import {
     PoolEntity,
     TokenEntity,
 } from '../generated/src/Types.gen'
-import { ZERO_BD, ZERO_BI } from './constants'
+import { ZERO_BD, ZERO_BD_STR, ZERO_BI } from './constants'
 import { addressToDex } from './utils/addressToDex'
 import { getPoolAddressToInfo } from './utils/getPoolAddressToInfo'
+import _ from 'lodash'
 
 // event event PoolCreated(address indexed pool, address indexed token0, address indexed token1, uint24 fee, int24 tickSpacing)
 FactoryContract_PoolCreated_loader(({ event, context }) => {
@@ -18,6 +19,9 @@ FactoryContract_PoolCreated_loader(({ event, context }) => {
     context.Factory.load(factoryAddress)
     // used to register dynamic contracts ie. contracts that are registered at runtime
     context.contractRegistration.addPool(event.params.pool)
+
+    context.Token.load(event.params.token0.toLowerCase(), {})
+    context.Token.load(event.params.token1.toLowerCase(), {})
 })
 
 FactoryContract_PoolCreated_handler(({ event, context }) => {
@@ -43,7 +47,7 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
 
         let bundleObject = {
             id: '1',
-            ethPriceUSD: ZERO_BD,
+            ethPriceUSD: ZERO_BD_STR,
         }
         context.Bundle.set(bundleObject)
     } else {
@@ -62,44 +66,82 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
     //   return;
     // }
 
-    // create tokens
-    let token0Object: TokenEntity = {
-        id: event.params.token0.toLowerCase(),
-        symbol: poolInfo.token0.symbol, //fetchTokenSymbol(event.params.token0),
-        name: poolInfo.token0.name, //fetchTokenName(event.params.token0),
-        totalSupply: BigInt(poolInfo.token0.totalSupply), //fetchTokenTotalSupply(event.params.token0),
-        decimals: BigInt(poolInfo.token0.decimals),
-        derivedETH: ZERO_BD,
-        volume: ZERO_BD,
-        volumeUSD: ZERO_BD,
-        feesUSD: ZERO_BD,
-        untrackedVolumeUSD: ZERO_BD,
-        totalValueLocked: ZERO_BD,
-        totalValueLockedUSD: ZERO_BD,
-        totalValueLockedUSDUntracked: ZERO_BD,
-        txCount: ZERO_BI,
-        poolCount: ZERO_BI,
-    }
-    context.Token.set(token0Object)
+    // check if tokens already exist
+    let token0Object: TokenEntity | undefined = context.Token.get(
+        event.params.token0.toLowerCase(),
+    )
+    let token1Object: TokenEntity | undefined = context.Token.get(
+        event.params.token1.toLowerCase(),
+    )
 
-    let token1Object: TokenEntity = {
-        id: event.params.token1.toLowerCase(),
-        symbol: poolInfo.token1.symbol, //fetchTokenSymbol(event.params.token0),
-        name: poolInfo.token1.name, //fetchTokenName(event.params.token0),
-        totalSupply: BigInt(poolInfo.token1.totalSupply), //fetchTokenTotalSupply(event.params.token0),
-        decimals: BigInt(poolInfo.token1.decimals),
-        derivedETH: ZERO_BD,
-        volume: ZERO_BD,
-        volumeUSD: ZERO_BD,
-        feesUSD: ZERO_BD,
-        untrackedVolumeUSD: ZERO_BD,
-        totalValueLocked: ZERO_BD,
-        totalValueLockedUSD: ZERO_BD,
-        totalValueLockedUSDUntracked: ZERO_BD,
-        txCount: ZERO_BI,
-        poolCount: ZERO_BI,
+    if (token0Object == undefined) {
+        // create tokens
+        token0Object = {
+            id: event.params.token0.toLowerCase(),
+            symbol: poolInfo.token0.symbol, //fetchTokenSymbol(event.params.token0),
+            name: poolInfo.token0.name, //fetchTokenName(event.params.token0),
+            totalSupply: BigInt(poolInfo.token0.totalSupply), //fetchTokenTotalSupply(event.params.token0),
+            decimals: BigInt(poolInfo.token0.decimals),
+            derivedETH: ZERO_BD_STR,
+            volume: ZERO_BD_STR,
+            volumeUSD: ZERO_BD_STR,
+            feesUSD: ZERO_BD_STR,
+            untrackedVolumeUSD: ZERO_BD_STR,
+            totalValueLocked: ZERO_BD_STR,
+            totalValueLockedUSD: ZERO_BD_STR,
+            totalValueLockedUSDUntracked: ZERO_BD_STR,
+            txCount: ZERO_BI,
+            poolCount: ZERO_BI,
+            whitelistPools: [],
+        }
+        context.Token.set(token0Object)
     }
-    context.Token.set(token1Object)
+
+    if (token1Object == undefined) {
+        // create tokens
+        token1Object = {
+            id: event.params.token1.toLowerCase(),
+            symbol: poolInfo.token1.symbol, //fetchTokenSymbol(event.params.token0),
+            name: poolInfo.token1.name, //fetchTokenName(event.params.token0),
+            totalSupply: BigInt(poolInfo.token1.totalSupply), //fetchTokenTotalSupply(event.params.token0),
+            decimals: BigInt(poolInfo.token1.decimals),
+            derivedETH: ZERO_BD_STR,
+            volume: ZERO_BD_STR,
+            volumeUSD: ZERO_BD_STR,
+            feesUSD: ZERO_BD_STR,
+            untrackedVolumeUSD: ZERO_BD_STR,
+            totalValueLocked: ZERO_BD_STR,
+            totalValueLockedUSD: ZERO_BD_STR,
+            totalValueLockedUSDUntracked: ZERO_BD_STR,
+            txCount: ZERO_BI,
+            poolCount: ZERO_BI,
+            whitelistPools: [],
+        }
+        context.Token.set(token1Object)
+    }
+
+    // update white listed pools
+    // I think any pools from subgraph are whitelisted?
+    // if (WHITELISTED_TOKEN_ADDRESSES.includes(token0.id)) {
+    const token1ObjectUpdated: TokenEntity = {
+        ...token1Object,
+        whitelistPools: _.concat(
+            token1Object.whitelistPools,
+            event.params.pool,
+        ),
+    }
+    context.Token.set(token1ObjectUpdated)
+    // }
+    // if (WHITELISTED_TOKEN_ADDRESSES.includes(token1.id)) {
+    const token0ObjectUpdated: TokenEntity = {
+        ...token0Object,
+        whitelistPools: _.concat(
+            token0Object.whitelistPools,
+            event.params.pool,
+        ),
+    }
+    context.Token.set(token0ObjectUpdated)
+    // }
 
     let poolObject: PoolEntity = {
         id: event.params.pool,
@@ -116,23 +158,23 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
         liquidity: ZERO_BI,
         feeGrowthGlobal0X128: ZERO_BI,
         feeGrowthGlobal1X128: ZERO_BI,
-        token0Price: ZERO_BD,
-        token1Price: ZERO_BD,
+        token0Price: ZERO_BD_STR,
+        token1Price: ZERO_BD_STR,
         observationIndex: ZERO_BI,
-        totalValueLockedToken0: ZERO_BD,
-        totalValueLockedToken1: ZERO_BD,
-        totalValueLockedUSD: ZERO_BD,
-        totalValueLockedETH: ZERO_BD,
-        totalValueLockedUSDUntracked: ZERO_BD,
-        volumeToken0: ZERO_BD,
-        volumeToken1: ZERO_BD,
-        volumeUSD: ZERO_BD,
-        feesUSD: ZERO_BD,
-        untrackedVolumeUSD: ZERO_BD,
+        totalValueLockedToken0: ZERO_BD_STR,
+        totalValueLockedToken1: ZERO_BD_STR,
+        totalValueLockedUSD: ZERO_BD_STR,
+        totalValueLockedETH: ZERO_BD_STR,
+        totalValueLockedUSDUntracked: ZERO_BD_STR,
+        volumeToken0: ZERO_BD_STR,
+        volumeToken1: ZERO_BD_STR,
+        volumeUSD: ZERO_BD_STR,
+        feesUSD: ZERO_BD_STR,
+        untrackedVolumeUSD: ZERO_BD_STR,
 
-        collectedFeesToken0: ZERO_BD,
-        collectedFeesToken1: ZERO_BD,
-        collectedFeesUSD: ZERO_BD,
+        collectedFeesToken0: ZERO_BD_STR,
+        collectedFeesToken1: ZERO_BD_STR,
+        collectedFeesUSD: ZERO_BD_STR,
     }
 
     // poolToToken[event.params.pool] = {

@@ -1,6 +1,8 @@
 // import { BigInt, BigDecimal, Address } from "@graphprotocol/graph-ts";
 // import { Factory as FactoryContract } from "../../generated-blah/templates/Pool/Factory";
 
+import Big from 'big.js'
+
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 
 // export const FACTORY_ADDRESS = Address.fromString("{{ v3.factory.address }}");
@@ -8,8 +10,11 @@ export const NETWORK = '{{ network }}'
 
 export const ZERO_BI = 0n // .fromI32(0);
 export const ONE_BI = 1n // BigInt.fromI32(1);
-export const ZERO_BD = '0' // BigDecimal.fromString("0");
-export const ONE_BD = '1' //BigDecimal.fromString("1");
+
+export const ZERO_BD_STR = '0' // BigDecimal.fromString("0");
+export const ONE_BD_STR = '1' // BigDecimal.fromString("0");
+export const ZERO_BD = new Big(ZERO_BD_STR) // BigDecimal.fromString("0");
+export const ONE_BD = new Big(ONE_BD_STR) //BigDecimal.fromString("1");
 // export const BI_18 = BigInt.fromI32(18);
 
 export const WHITELISTED_TOKEN_ADDRESSES: string[] =
