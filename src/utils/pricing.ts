@@ -41,17 +41,21 @@ export function sqrtPriceX96ToTokenPrices(
     return [price0, price1]
 }
 
-export function getEthPriceInUSD(nativeAndStablePool: PoolEntity): string {
+export function getEthPriceInUSD(
+    nativeAndStablePool: PoolEntity | undefined,
+): string {
     // fetch eth prices for each stablecoin
     // let nativeAndStablePool = Pool.load(NATIVE_PRICE_POOL)
 
-    if (nativeAndStablePool !== null) {
-        return nativeAndStablePool.token0 == NATIVE_ADDRESS.toLowerCase()
+    if (nativeAndStablePool !== undefined) {
+        return nativeAndStablePool.token0.toLowerCase() ==
+            NATIVE_ADDRESS.toLowerCase()
             ? nativeAndStablePool.token1Price
             : nativeAndStablePool.token0Price
     } else {
         return ZERO_BD_STR
     }
+    // return '2080.712613442138485352331619073978'
 }
 
 /**

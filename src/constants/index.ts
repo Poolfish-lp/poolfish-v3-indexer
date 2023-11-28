@@ -20,10 +20,12 @@ export const ONE_BD = new Big(ONE_BD_STR) //BigDecimal.fromString("1");
 export const WHITELISTED_TOKEN_ADDRESSES: string[] =
     '{{ v3.whitelistedTokenAddresses }}'.split(',')
 
-export const NATIVE_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' //'{{ v3.native.address }}'  native address for mainnet weth
+export const NATIVE_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' //'{{ v3.native.address }}'  native address for mainnet weth
 
-export const STABLE_TOKEN_ADDRESSES: string[] =
-    '{{ v3.stableTokenAddresses }}'.split(',')
+export const STABLE_TOKEN_ADDRESSES: string[] = [
+    '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+] //usdc stable coin for mainnet
+// '{{ v3.stableTokenAddresses }}'.split(',')
 
 export const MINIMUM_ETH_LOCKED = 0 //BigDecimal.fromString(
 //   "{{ v3.minimumEthLocked }}"
