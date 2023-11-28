@@ -9,7 +9,12 @@ import {
     PoolContract_Swap_handler,
 } from '../generated/src/Handlers.gen'
 
-import { PoolEntity, TickEntity, TokenEntity } from '../generated/src/Types.gen'
+import {
+    BundleEntity,
+    PoolEntity,
+    TickEntity,
+    TokenEntity,
+} from '../generated/src/Types.gen'
 import { NATIVE_PRICE_POOL, ONE_BI, ZERO_BD, ZERO_BI } from './constants'
 import { getPoolAddressToInfo } from './utils/getPoolAddressToInfo'
 import bigInt, { BigInteger } from 'big-integer'
@@ -46,6 +51,8 @@ PoolContract_Initialize_loader(({ event, context }) => {
             loadToken1: {},
         },
     })
+
+    context.Bundle.load('1')
 })
 
 PoolContract_Initialize_handler(({ event, context }) => {
@@ -450,6 +457,13 @@ PoolContract_Swap_loader(({ event, context }) => {
         },
     })
 
+    context.Pool.load(NATIVE_PRICE_POOL, {
+        loaders: {
+            loadToken0: {},
+            loadToken1: {},
+        },
+    })
+
     context.Bundle.bundleLoad('1')
 })
 
@@ -605,10 +619,12 @@ PoolContract_Swap_handler(async ({ event, context }) => {
     }
     context.Token.set(token1Object)
 
+    const nativePool = context.Pool.get(NATIVE_PRICE_POOL)
+
     // update USD pricing
-    let bundleObject = {
+    let bundleObject: BundleEntity = {
         ...bundle,
-        ethPriceUSD: getEthPriceInUSD(poolObject),
+        ethPriceUSD: getEthPriceInUSD(nativePool),
     }
     context.Bundle.set(bundleObject)
 
