@@ -39,6 +39,8 @@ type Bundle @entity {
 type Token @entity {
     # token address
     id: ID!
+    # chain id of token
+    chainId: String!
     # token symbol
     symbol: String!
     # token name
