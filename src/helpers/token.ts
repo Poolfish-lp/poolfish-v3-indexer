@@ -1,6 +1,6 @@
 import type { Address, Event } from '../types'
 import type { TokenEntity as Token } from '../../generated/src/Types.gen'
-import { Cache, CacheCategory, framework } from './'
+import { Cache, CacheCategory, framework } from '../async'
 import { fromHex } from 'viem'
 import { ZERO_BI, ZERO_BD } from '../constants'
 
@@ -12,7 +12,9 @@ export function getToken(
     const loaded = loader(id)
 
     if (!loaded) {
-        throw new Error('Missing token instance')
+        let errMsg = 'Non existent token'
+        console.log(errMsg)
+        throw new Error(errMsg)
     }
 
     return loaded
@@ -26,7 +28,9 @@ export async function getToken_async(
     const loaded = await loader(id)
 
     if (!loaded) {
-        throw new Error('Missing token instance')
+        let errMsg = 'Non existent token'
+        console.log(errMsg)
+        throw new Error(errMsg)
     }
 
     return loaded

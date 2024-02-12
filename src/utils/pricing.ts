@@ -37,7 +37,9 @@ export function sqrtPriceX96ToTokenPrices(
     return [price0, price1]
 }
 
-export function getEthPriceInUSD(nativeAndStablePool: PoolEntity): string {
+export function getNativeTokenPriceInUSD(
+    nativeAndStablePool: PoolEntity,
+): string {
     // fetch eth prices for each stablecoin
     // let nativeAndStablePool = Pool.load(NATIVE_PRICE_POOL)
 
@@ -71,7 +73,7 @@ export function getEthPriceInUSD(nativeAndStablePool: PoolEntity): string {
 //     // hardcoded fix for incorrect rates
 //     // if whitelist includes token - get the safe price
 //     if (STABLE_TOKEN_ADDRESSES.includes(token.id)) {
-//         priceSoFar = safeDiv(new Big(ONE_BD), new Big(bundle.ethPriceUSD))
+//         priceSoFar = safeDiv(new Big(ONE_BD), new Big(bundle.nativeTokenPriceUSD))
 //     } else {
 //         for (let i = 0; i < whiteList.length; ++i) {
 //             let poolAddress = whiteList[i]
@@ -131,8 +133,8 @@ export function getTrackedAmountUSD(
     token1: TokenEntity,
     bundle: BundleEntity,
 ): Big {
-    let price0USD = new Big(token0.derivedETH).times(bundle.ethPriceUSD)
-    let price1USD = new Big(token1.derivedETH).times(bundle.ethPriceUSD)
+    let price0USD = new Big(token0.derivedETH).times(bundle.nativeTokenPriceUSD)
+    let price1USD = new Big(token1.derivedETH).times(bundle.nativeTokenPriceUSD)
 
     return tokenAmount0.times(price0USD).plus(tokenAmount1.times(price1USD))
 
