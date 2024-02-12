@@ -16,6 +16,8 @@ import { addressToDex } from './utils/addressToDex'
 
 import { getOrCreateToken_async } from './helpers'
 
+import { ethereumSushiswapConfig } from './config'
+
 // PoolCreated(address indexed pool, address indexed token0, address indexed token1, uint24 fee, int24 tickSpacing)
 FactoryContract_PoolCreated_loader(({ event, context }) => {
     // used to register dynamic contracts ie. contracts that are registered at runtime
@@ -67,38 +69,27 @@ FactoryContract_PoolCreated_handlerAsync(async ({ event, context }) => {
         await context.Factory.set(factoryObject)
     }
 
-    // let decimals = 6n; //fetchTokenDecimals(event.params.token0);
-    // bail if we couldn't figure out the decimals
-    // if (decimals === null) {
-    //   await context.log.info("mybug the decimal on token 0 was null");
-    //   return;
-    // }
-
     // create tokens
-    let token0Object: Token = await getOrCreateToken_async(
+    let token0: Token = await getOrCreateToken_async(
         event,
         event.params.token0,
         context.Token.get,
     )
 
-    await context.Token.set(token0Object)
-
-    let token1Object: Token = await getOrCreateToken_async(
+    let token1: Token = await getOrCreateToken_async(
         event,
         event.params.token1,
         context.Token.get,
     )
 
-    await context.Token.set(token1Object)
-
-    let poolObject: Pool = {
+    let pool: Pool = {
         id: event.params.pool,
         createdAtTimestamp: BigInt(event.blockTimestamp), // can see this list of available properties here https://docs.envio.dev/docs/event-handlers
         tick: ZERO_BI,
         dexKey: dexKey,
-        token0: token0Object.id,
-        token1: token1Object.id,
-        feeTier: BigInt(event.params.fee), //BigInt.fromI32(event.params.fee),
+        token0: event.params.token0,
+        token1: event.params.token1,
+        feeTier: BigInt(event.params.fee),
         createdAtBlockNumber: BigInt(event.blockNumber),
         liquidityProviderCount: ZERO_BI,
         txCount: 0,
@@ -125,8 +116,39 @@ FactoryContract_PoolCreated_handlerAsync(async ({ event, context }) => {
         factory: event.srcAddress,
     }
 
-    await context.Pool.set(poolObject)
-    // }
+    await context.Pool.set(pool)
+
+    // update white listed pools
+    if (
+        ethereumSushiswapConfig.whitelistedTokenAddresses.includes(
+            token0.id.toLowerCase(),
+        )
+    ) {
+        let newPools = token1.whitelistPools
+        newPools.push(pool.id)
+        token1 = {
+            ...token1,
+            whitelistPools: newPools,
+        }
+    }
+
+    // update white listed pools
+    if (
+        ethereumSushiswapConfig.whitelistedTokenAddresses.includes(
+            token1.id.toLowerCase(),
+        )
+    ) {
+        let newPools = token0.whitelistPools
+        newPools.push(pool.id)
+        token0 = {
+            ...token0,
+            whitelistPools: newPools,
+        }
+    }
+
+    await context.Token.set(token0)
+
+    await context.Token.set(token1)
 })
 
 // OwnerChanged(address indexed oldOwner, address indexed newOwner)
