@@ -1,26 +1,27 @@
 /* eslint-disable prefer-const */
 import bigInt from 'big-integer'
 import {
-    BundleEntity,
-    PoolEntity,
-    TokenEntity,
+    BundleEntity as Bundle,
+    PoolEntity as Pool,
+    TokenEntity as Token,
 } from '../../generated/src/Types.gen'
 import {
-    MINIMUM_ETH_LOCKED,
     NATIVE_ADDRESS,
     NATIVE_PRICE_POOL,
     ONE_BD,
     ZERO_BD,
+    ZERO_BI,
 } from '../constants'
 import Big from 'big.js'
 import { exponentToBig, safeDiv } from './misc'
+import { ethereumSushiswapConfig } from '../config'
 
 const Q192 = bigInt(2).pow(bigInt(192)) // BigInt.fromI32(2).pow(BigInt.fromI32(192).toI32() as u8)
 
 export function sqrtPriceX96ToTokenPrices(
     sqrtPriceX96: BigInt,
-    token0: TokenEntity,
-    token1: TokenEntity,
+    token0: Token,
+    token1: Token,
 ): Big[] {
     let num = new Big(
         bigInt(sqrtPriceX96.toString())
@@ -37,9 +38,7 @@ export function sqrtPriceX96ToTokenPrices(
     return [price0, price1]
 }
 
-export function getNativeTokenPriceInUSD(
-    nativeAndStablePool: PoolEntity,
-): string {
+export function getNativeTokenPriceInUSD(nativeAndStablePool: Pool): string {
     // fetch eth prices for each stablecoin
     // let nativeAndStablePool = Pool.load(NATIVE_PRICE_POOL)
 
@@ -57,9 +56,9 @@ export function getNativeTokenPriceInUSD(
  * @todo update to be derived ETH (add stablecoin estimates)
  **/
 // export function findEthPerToken(
-//     token: TokenEntity,
-//     pool: PoolEntity,
-//     bundle: BundleEntity,
+//     token: Token,
+//     pool: Pool,
+//     bundle: Bundle,
 // ): Big {
 //     if (token.id == NATIVE_ADDRESS.toLowerCase()) {
 //         return new Big(ONE_BD)
@@ -121,6 +120,113 @@ export function getNativeTokenPriceInUSD(
 // }
 
 /**
+ * Search through graph to find derived Eth per token.
+ * @todo update to be derived ETH (add stablecoin estimates)
+ **/
+export const findEthPerToken = async (
+    token: Token,
+    chainId: string,
+    bundleLoader: (id: string) => Promise<Bundle | undefined>,
+    poolLoader: (id: string) => Promise<Pool | undefined>,
+    tokenLoader: (id: string) => Promise<Token | undefined>,
+): Promise<string> => {
+    if (token.id.toLowerCase() == NATIVE_ADDRESS.toLowerCase()) {
+        return ONE_BD
+    }
+
+    let whiteList = token.whitelistPools
+    // for now just take USD from pool with greatest TVL
+    // need to update this to actually detect best rate based on liquidity distribution
+    let largestLiquidityETH = new Big(ZERO_BD)
+    let priceSoFar = ZERO_BD
+    let bundle = await bundleLoader(chainId)
+
+    if (!bundle) {
+        let errMsg = 'Non existent bundle'
+        console.error(errMsg)
+        throw new Error(errMsg)
+    }
+
+    // hardcoded fix for incorrect rates
+    // if whitelist includes token - get the safe price
+    if (ethereumSushiswapConfig.stableTokenAddresses.includes(token.id)) {
+        priceSoFar = safeDiv(
+            new Big(ONE_BD),
+            new Big(bundle.nativeTokenPriceUSD),
+        ).toString()
+    } else {
+        for (let i = 0; i < whiteList.length; ++i) {
+            let poolAddress = whiteList[i]
+            let pool = await poolLoader(poolAddress)
+
+            if (!pool) {
+                let errMsg = 'Non existent pool'
+                console.error(errMsg)
+                throw new Error(errMsg)
+            }
+
+            if (pool.liquidity > ZERO_BI) {
+                if (pool.token0 == token.id) {
+                    // whitelist token is token1
+                    let token1 = await tokenLoader(pool.token1)
+
+                    if (!token1) {
+                        let errMsg = 'Non existent token'
+                        console.error(errMsg)
+                        throw new Error(errMsg)
+                    }
+
+                    // get the derived ETH in pool
+                    let ethLocked = new Big(pool.totalValueLockedToken1).times(
+                        token1.derivedETH,
+                    )
+                    if (
+                        ethLocked.gt(largestLiquidityETH) &&
+                        ethLocked.gt(
+                            new Big(ethereumSushiswapConfig.minimumEthLocked),
+                        )
+                    ) {
+                        largestLiquidityETH = ethLocked
+                        // token1 per our token * Eth per token1
+                        priceSoFar = new Big(pool.token1Price)
+                            .times(new Big(token1.derivedETH))
+                            .toString()
+                    }
+                }
+                if (pool.token1 == token.id) {
+                    // whitelist token is token1
+                    let token0 = await tokenLoader(pool.token0)
+
+                    if (!token0) {
+                        let errMsg = 'Non existent token'
+                        console.error(errMsg)
+                        throw new Error(errMsg)
+                    }
+
+                    // get the derived ETH in pool
+                    let ethLocked = new Big(pool.totalValueLockedToken1).times(
+                        token0.derivedETH,
+                    )
+                    if (
+                        ethLocked.gt(largestLiquidityETH) &&
+                        ethLocked.gt(
+                            new Big(ethereumSushiswapConfig.minimumEthLocked),
+                        )
+                    ) {
+                        largestLiquidityETH = ethLocked
+                        // token1 per our token * Eth per token1
+                        priceSoFar = new Big(pool.token1Price)
+                            .times(new Big(token0.derivedETH))
+                            .toString()
+                    }
+                }
+            }
+        }
+    }
+    return priceSoFar
+}
+
+/**
  * Accepts tokens and amounts, return tracked amount based on token whitelist
  * If one token on whitelist, return amount in that token converted to USD * 2.
  * If both are, return sum of two amounts
@@ -128,10 +234,10 @@ export function getNativeTokenPriceInUSD(
  */
 export function getTrackedAmountUSD(
     tokenAmount0: Big,
-    token0: TokenEntity,
+    token0: Token,
     tokenAmount1: Big,
-    token1: TokenEntity,
-    bundle: BundleEntity,
+    token1: Token,
+    bundle: Bundle,
 ): Big {
     let price0USD = new Big(token0.derivedETH).times(bundle.nativeTokenPriceUSD)
     let price1USD = new Big(token1.derivedETH).times(bundle.nativeTokenPriceUSD)
