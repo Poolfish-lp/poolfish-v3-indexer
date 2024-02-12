@@ -71,6 +71,7 @@ async function createToken(event: Event, address: Address) {
         totalValueLockedUSDUntracked: ZERO_BD,
         txCount: ZERO_BI,
         poolCount: ZERO_BI, // should this start as 1
+        whitelistPools: [],
     }
 
     return entity
