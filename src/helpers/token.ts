@@ -87,7 +87,7 @@ async function details(address: Address, chainId: number) {
 
     if (token) {
         return {
-            address,
+            address: address.toLowerCase(),
             decimals: BigInt(token.decimals),
             name: token.name,
             symbol: token.symbol,
@@ -157,8 +157,8 @@ async function details(address: Address, chainId: number) {
             console.error(_error, __error)
             return {
                 decimals: 0n,
-                symbol: address,
-                name: address,
+                symbol: address.toLowerCase(),
+                name: address.toLowerCase(),
                 totalSupply: 0n,
             }
         }

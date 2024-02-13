@@ -4,7 +4,7 @@ export const getFactory_async = async (
     id: string,
     loader: (id: string) => Promise<Factory | undefined>,
 ) => {
-    let factory = await loader(id)
+    let factory = await loader(id.toLowerCase())
 
     if (!factory) {
         let errMsg = 'Non existent factory'

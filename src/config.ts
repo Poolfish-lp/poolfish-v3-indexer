@@ -97,6 +97,6 @@ export const ethereumSushiswapConfig = {
         SUSD_ADDRESS,
         TUSD_ADDRESS,
     ],
-    nativePricePool: '0x35644fb61afbc458bf92b15add6abc1996be5014',
+    nativePricePool: '0x35644Fb61aFBc458bf92B15AdD6ABc1996Be5014',
     minimumEthLocked: 1.5,
 }

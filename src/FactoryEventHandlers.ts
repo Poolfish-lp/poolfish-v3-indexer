@@ -25,13 +25,13 @@ FactoryContract_PoolCreated_loader(({ event, context }) => {
 })
 
 FactoryContract_PoolCreated_handlerAsync(async ({ event, context }) => {
-    let factoryAddress = event.srcAddress
+    let factoryAddress = event.srcAddress.toLowerCase()
     let factory = await context.Factory.get(factoryAddress)
 
-    const dexKey = addressToDex(event.srcAddress)
+    const dexKey = addressToDex(factoryAddress)
 
     if (factory == null) {
-        let factoryObject: Factory = {
+        let updatedFactory: Factory = {
             id: factoryAddress,
             address: factoryAddress,
             poolCount: 0,
@@ -51,22 +51,22 @@ FactoryContract_PoolCreated_handlerAsync(async ({ event, context }) => {
             owner: event.txOrigin ? event.txOrigin?.toString() : 'unknown', // the owner is the deployer initially
         }
 
-        await context.Factory.set(factoryObject)
+        await context.Factory.set(updatedFactory)
 
-        let bundleObject: Bundle = {
+        let updatedBundle: Bundle = {
             id: event.chainId.toString(),
             nativeTokenPriceUSD: ZERO_BD,
         }
 
-        await context.Bundle.set(bundleObject)
+        await context.Bundle.set(updatedBundle)
     } else {
-        let factoryObject: Factory = {
+        let updatedFactory: Factory = {
             ...factory,
             poolCount: factory.poolCount + 1,
             pools: [...factory.pools, event.params.pool],
         }
 
-        await context.Factory.set(factoryObject)
+        await context.Factory.set(updatedFactory)
     }
 
     // create tokens
@@ -83,12 +83,12 @@ FactoryContract_PoolCreated_handlerAsync(async ({ event, context }) => {
     )
 
     let pool: Pool = {
-        id: event.params.pool,
+        id: event.params.pool.toLowerCase(),
         createdAtTimestamp: BigInt(event.blockTimestamp), // can see this list of available properties here https://docs.envio.dev/docs/event-handlers
         tick: ZERO_BI,
         dexKey: dexKey,
-        token0: event.params.token0,
-        token1: event.params.token1,
+        token0: event.params.token0.toLowerCase(),
+        token1: event.params.token1.toLowerCase(),
         feeTier: BigInt(event.params.fee),
         createdAtBlockNumber: BigInt(event.blockNumber),
         liquidityProviderCount: ZERO_BI,
@@ -113,7 +113,7 @@ FactoryContract_PoolCreated_handlerAsync(async ({ event, context }) => {
         collectedFeesToken0: ZERO_BD,
         collectedFeesToken1: ZERO_BD,
         collectedFeesUSD: ZERO_BD,
-        factory: event.srcAddress,
+        factory: factoryAddress,
     }
 
     await context.Pool.set(pool)
@@ -153,20 +153,20 @@ FactoryContract_PoolCreated_handlerAsync(async ({ event, context }) => {
 
 // OwnerChanged(address indexed oldOwner, address indexed newOwner)
 FactoryContract_OwnerChanged_loader(({ event, context }) => {
-    let factoryAddress = event.srcAddress
+    let factoryAddress = event.srcAddress.toLowerCase()
     context.Factory.load(factoryAddress)
 })
 
 FactoryContract_OwnerChanged_handler(({ event, context }) => {
-    let factoryAddress = event.srcAddress
+    let factoryAddress = event.srcAddress.toLowerCase()
     let factory = context.Factory.get(factoryAddress)
 
     if (factory) {
-        let factoryObject: Factory = {
+        let updatedFactory: Factory = {
             ...factory,
-            owner: event.params.newOwner,
+            owner: event.params.newOwner.toLowerCase(),
         }
 
-        context.Factory.set(factoryObject)
+        context.Factory.set(updatedFactory)
     }
 })
