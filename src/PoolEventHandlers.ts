@@ -11,7 +11,6 @@ import {
 
 import { PoolEntity, TokenEntity } from '../generated/src/Types.gen'
 import { NATIVE_PRICE_POOL, ONE_BI, ZERO_BD, ZERO_BI } from './constants'
-import { getPoolAddressToInfo } from './utils/getPoolAddressToInfo'
 import bigInt, { BigInteger } from 'big-integer'
 import {
     convertTokenToDecimal,
@@ -42,10 +41,6 @@ PoolContract_Initialize_loader(({ event, context }) => {
 })
 
 PoolContract_Initialize_handler(({ event, context }) => {
-    const poolInfo = getPoolAddressToInfo(event.srcAddress)
-    if (!poolInfo) {
-        return
-    }
     let pool = context.Pool.get(event.srcAddress)
 
     let ethPool = context.Pool.get(NATIVE_PRICE_POOL)
@@ -71,30 +66,21 @@ PoolContract_Initialize_handler(({ event, context }) => {
     }
 })
 
+// event Mint(address sender, address indexed owner, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount, uint256 amount0, uint256 amount1)
 PoolContract_Mint_loader(({ event, context }) => {
     let poolAddress = event.srcAddress
-    const poolInfo = getPoolAddressToInfo(poolAddress)
-    if (!poolInfo) {
-        return
-    }
+
     context.Pool.load(poolAddress, {
         loaders: {
             loadToken0: true,
             loadToken1: true,
         },
     })
-    context.Token.load(poolInfo.token0.id)
-    context.Token.load(poolInfo.token1.id)
 
     context.Bundle.load('1')
 })
 
 PoolContract_Mint_handler(({ event, context }) => {
-    const poolInfo = getPoolAddressToInfo(event.srcAddress)
-    if (!poolInfo) {
-        return
-    }
-
     let pool = context.Pool.get(event.srcAddress)
 
     if (!pool) {
@@ -183,28 +169,17 @@ PoolContract_Mint_handler(({ event, context }) => {
 
 PoolContract_Burn_loader(({ event, context }) => {
     let poolAddress = event.srcAddress
-    const poolInfo = getPoolAddressToInfo(poolAddress)
-    if (!poolInfo) {
-        return
-    }
     context.Pool.load(poolAddress, {
         loaders: {
             loadToken0: true,
             loadToken1: true,
         },
     })
-    context.Token.load(poolInfo.token0.id)
-    context.Token.load(poolInfo.token1.id)
 
     context.Bundle.load('1')
 })
 
 PoolContract_Burn_handler(({ event, context }) => {
-    const poolInfo = getPoolAddressToInfo(event.srcAddress)
-    if (!poolInfo) {
-        return
-    }
-
     let pool = context.Pool.get(event.srcAddress)
 
     if (!pool) {
@@ -293,28 +268,17 @@ PoolContract_Burn_handler(({ event, context }) => {
 
 PoolContract_Swap_loader(({ event, context }) => {
     let poolAddress = event.srcAddress
-    const poolInfo = getPoolAddressToInfo(poolAddress)
-    if (!poolInfo) {
-        return
-    }
     context.Pool.load(poolAddress, {
         loaders: {
             loadToken0: true,
             loadToken1: true,
         },
     })
-    context.Token.load(poolInfo.token0.id)
-    context.Token.load(poolInfo.token1.id)
 
     context.Bundle.load('1')
 })
 
 PoolContract_Swap_handler(async ({ event, context }) => {
-    const poolInfo = getPoolAddressToInfo(event.srcAddress)
-    if (!poolInfo) {
-        return
-    }
-
     let pool = context.Pool.get(event.srcAddress)
 
     if (!pool) {

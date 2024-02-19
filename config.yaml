@@ -5,6 +5,7 @@ contracts:
     handler: src/FactoryEventHandlers.ts
     events:
       - event: "event PoolCreated(address indexed token0, address indexed token1, uint24 indexed fee, int24 tickSpacing, address pool)"
+        isAsync: true
   - name: Pool
     handler: src/PoolEventHandlers.ts
     events:
