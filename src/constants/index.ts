@@ -25,6 +25,7 @@ export const MINIMUM_ETH_LOCKED = 0 //BigDecimal.fromString(
 // );
 
 export const NATIVE_PRICE_POOL = '0x763d3b7296e7c9718ad5b058ac2692a19e5b3638' //Address.fromString("{{ v3.nativePricePool }}") //native address for sushi mainnet
+
 // .toHex()
 // .toLowerCase();
 
