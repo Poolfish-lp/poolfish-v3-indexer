@@ -43,7 +43,7 @@ export function getNativeTokenPriceInUSD(nativeAndStablePool: Pool): string {
     // let nativeAndStablePool = Pool.load(NATIVE_PRICE_POOL)
 
     if (nativeAndStablePool !== null) {
-        return nativeAndStablePool.token0 == NATIVE_ADDRESS.toLowerCase()
+        return nativeAndStablePool.token0_id == NATIVE_ADDRESS.toLowerCase()
             ? nativeAndStablePool.token1Price
             : nativeAndStablePool.token0Price
     } else {
@@ -98,9 +98,9 @@ export const findEthPerToken = async (
             }
 
             if (pool.liquidity > ZERO_BI) {
-                if (pool.token0 == token.id) {
+                if (pool.token0_id == token.id) {
                     // whitelist token is token1
-                    let token1 = await tokenLoader(pool.token1)
+                    let token1 = await tokenLoader(pool.token1_id)
 
                     if (!token1) {
                         let errMsg = 'Non existent token'
@@ -125,9 +125,9 @@ export const findEthPerToken = async (
                             .toString()
                     }
                 }
-                if (pool.token1 == token.id) {
+                if (pool.token1_id == token.id) {
                     // whitelist token is token1
-                    let token0 = await tokenLoader(pool.token0)
+                    let token0 = await tokenLoader(pool.token0_id)
 
                     if (!token0) {
                         let errMsg = 'Non existent token'
