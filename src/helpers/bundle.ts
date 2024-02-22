@@ -4,7 +4,7 @@ export const getBundle_async = async (
     id: string,
     loader: (id: string) => Promise<Bundle | undefined>,
 ) => {
-    let bundle = await loader(id)
+    let bundle = await loader(id.toLowerCase())
 
     if (!bundle) {
         let errMsg = 'Non existent bundle'
