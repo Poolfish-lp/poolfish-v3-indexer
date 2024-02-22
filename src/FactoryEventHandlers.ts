@@ -87,8 +87,8 @@ FactoryContract_PoolCreated_handlerAsync(async ({ event, context }) => {
         createdAtTimestamp: BigInt(event.blockTimestamp), // can see this list of available properties here https://docs.envio.dev/docs/event-handlers
         tick: ZERO_BI,
         dexKey: dexKey,
-        token0: event.params.token0.toLowerCase(),
-        token1: event.params.token1.toLowerCase(),
+        token0_id: event.params.token0.toLowerCase(),
+        token1_id: event.params.token1.toLowerCase(),
         feeTier: BigInt(event.params.fee),
         createdAtBlockNumber: BigInt(event.blockNumber),
         liquidityProviderCount: ZERO_BI,
@@ -113,7 +113,7 @@ FactoryContract_PoolCreated_handlerAsync(async ({ event, context }) => {
         collectedFeesToken0: ZERO_BD,
         collectedFeesToken1: ZERO_BD,
         collectedFeesUSD: ZERO_BD,
-        factory: factoryAddress,
+        factory_id: factoryAddress,
     }
 
     await context.Pool.set(pool)

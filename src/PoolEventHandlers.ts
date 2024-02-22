@@ -49,8 +49,8 @@ PoolContract_Initialize_handlerAsync(async ({ event, context }) => {
 
     context.Pool.set(updatedPool)
 
-    let token0 = await getToken_async(pool.token0, context.Token.get)
-    let token1 = await getToken_async(pool.token1, context.Token.get)
+    let token0 = await getToken_async(pool.token0_id, context.Token.get)
+    let token1 = await getToken_async(pool.token1_id, context.Token.get)
 
     let derivedETH0 = await findEthPerToken(
         token0,
@@ -110,9 +110,9 @@ PoolContract_Mint_handlerAsync(async ({ event, context }) => {
         event.chainId.toString(),
         context.Bundle.get,
     )
-    let factory = await getFactory_async(pool.factory, context.Factory.get)
-    let token0 = await getToken_async(pool.token0, context.Token.get)
-    let token1 = await getToken_async(pool.token1, context.Token.get)
+    let factory = await getFactory_async(pool.factory_id, context.Factory.get)
+    let token0 = await getToken_async(pool.token0_id, context.Token.get)
+    let token1 = await getToken_async(pool.token1_id, context.Token.get)
 
     // context.log.info(new Big(factory.totalValueLockedETH).toString())
     // context.log.info(pool.totalValueLockedETH)
@@ -212,8 +212,8 @@ PoolContract_Mint_handlerAsync(async ({ event, context }) => {
     //   mint.transaction = transaction.id
     //   mint.timestamp = transaction.timestamp
     //   mint.pool = pool.id
-    //   mint.token0 = pool.token0
-    //   mint.token1 = pool.token1
+    //   mint.token0 = pool.token0_id
+    //   mint.token1 = pool.token1_id
     //   mint.owner = event.params.owner
     //   mint.sender = event.params.sender
     //   mint.origin = event.transaction.from
@@ -277,10 +277,10 @@ PoolContract_Burn_handlerAsync(async ({ event, context }) => {
         event.chainId.toString(),
         context.Bundle.get,
     )
-    let factory = await getFactory_async(pool.factory, context.Factory.get)
+    let factory = await getFactory_async(pool.factory_id, context.Factory.get)
 
-    let token0 = await getToken_async(pool.token0, context.Token.get)
-    let token1 = await getToken_async(pool.token1, context.Token.get)
+    let token0 = await getToken_async(pool.token0_id, context.Token.get)
+    let token1 = await getToken_async(pool.token1_id, context.Token.get)
 
     let amount0 = convertTokenToDecimal(event.params.amount0, token0?.decimals)
     let amount1 = convertTokenToDecimal(event.params.amount1, token1?.decimals)
@@ -370,8 +370,8 @@ PoolContract_Burn_handlerAsync(async ({ event, context }) => {
     //   burn.transaction = transaction.id
     //   burn.timestamp = transaction.timestamp
     //   burn.pool = pool.id
-    //   burn.token0 = pool.token0
-    //   burn.token1 = pool.token1
+    //   burn.token0 = pool.token0_id
+    //   burn.token1 = pool.token1_id
     //   burn.owner = event.params.owner
     //   burn.origin = event.transaction.from
     //   burn.amount = event.params.amount
@@ -414,10 +414,10 @@ PoolContract_Swap_handlerAsync(async ({ event, context }) => {
         event.chainId.toString(),
         context.Bundle.get,
     )
-    let factory = await getFactory_async(pool.factory, context.Factory.get)
+    let factory = await getFactory_async(pool.factory_id, context.Factory.get)
 
-    let token0 = await getToken_async(pool.token0, context.Token.get)
-    let token1 = await getToken_async(pool.token1, context.Token.get)
+    let token0 = await getToken_async(pool.token0_id, context.Token.get)
+    let token1 = await getToken_async(pool.token1_id, context.Token.get)
 
     // amounts - 0/1 are token deltas: can be positive or negative
     let amount0 = convertTokenToDecimal(event.params.amount0, token0.decimals)
@@ -574,8 +574,8 @@ PoolContract_Swap_handlerAsync(async ({ event, context }) => {
     //   swap.transaction = transaction.id
     //   swap.timestamp = transaction.timestamp
     //   swap.pool = pool.id
-    //   swap.token0 = pool.token0
-    //   swap.token1 = pool.token1
+    //   swap.token0 = pool.token0_id
+    //   swap.token1 = pool.token1_id
     //   swap.sender = event.params.sender.toLowerCase()
     //   swap.origin = event.transaction.from.toLowerCase()
     //   swap.recipient = event.params.recipient.toLowerCase()
