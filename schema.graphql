@@ -3,42 +3,53 @@
 type Factory {
     # factory address
     id: ID!
+    # factory address
+    address: String!
+    # chain id of Factory
+    chainId: Int!
     # the dex this is on
     dexKey: String!
     # amount of pools created
-    poolCount: BigInt!
+    poolCount: Int!
     # # amoutn of transactions all time
-    # txCount: BigInt!
+    txCount: Int!
     # # total volume all time in derived USD
-    # totalVolumeUSD: String!
+    totalVolumeUSD: String!
     # # total volume all time in derived ETH
-    # totalVolumeETH: String!
+    totalVolumeETH: String!
     # # total swap fees all time in USD
-    # totalFeesUSD: String!
+    totalFeesUSD: String!
     # # total swap fees all time in USD
-    # totalFeesETH: String!
+    totalFeesETH: String!
     # # all volume even through less reliable USD values
-    # untrackedVolumeUSD: String!
+    untrackedVolumeUSD: String!
     # # TVL derived in USD
-    # totalValueLockedUSD: String!
+    totalValueLockedUSD: String!
     # # TVL derived in ETH
-    # totalValueLockedETH: String!
+    totalValueLockedETH: String!
     # # TVL derived in USD untracked
-    # totalValueLockedUSDUntracked: String!
+    totalValueLockedUSDUntracked: String!
     # # TVL derived in ETH untracked
-    # totalValueLockedETHUntracked: String!
+    totalValueLockedETHUntracked: String!
+    # current owner of the factory
+    owner: String!
+    # list of all pools created by that factory
+    pools: [String!]!
 }
 
 # stores for USD calculations
 type Bundle @entity {
+    # chainId
     id: ID!
-    # price of ETH in usd
-    ethPriceUSD: String!
+    # price of the native network token in usd
+    nativeTokenPriceUSD: String!
 }
 
 type Token @entity {
     # token address
     id: ID!
+    # chain id of token
+    chainId: String!
     # token symbol
     symbol: String!
     # token name
@@ -68,7 +79,7 @@ type Token @entity {
     # derived price in ETH
     derivedETH: String!
     # pools token is in that are white listed for USD pricing
-    # whitelistPools: [Pool!]!
+    whitelistPools: [String!]!
     # derived fields
     # tokenDayData: [TokenDayData!]! @derivedFrom(field: "token")
 }
@@ -76,6 +87,8 @@ type Token @entity {
 type Pool @entity {
     # pool address
     id: ID!
+    # factory contract where the pool was created
+    factory: Factory!
     # the dex this is on
     dexKey: String!
     # creation
@@ -115,7 +128,7 @@ type Pool @entity {
     # fees in USD
     feesUSD: String!
     # all time number of transactions
-    txCount: BigInt!
+    txCount: Int!
     # all time fees collected token0
     collectedFeesToken0: String!
     # all time fees collected token1

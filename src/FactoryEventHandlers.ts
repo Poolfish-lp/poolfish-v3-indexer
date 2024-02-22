@@ -1,117 +1,98 @@
 import {
     FactoryContract_PoolCreated_loader,
-    FactoryContract_PoolCreated_handler,
+    FactoryContract_PoolCreated_handlerAsync,
+    FactoryContract_OwnerChanged_loader,
+    FactoryContract_OwnerChanged_handler,
 } from '../generated/src/Handlers.gen'
 
 import {
-    FactoryEntity,
-    PoolEntity,
-    TokenEntity,
+    FactoryEntity as Factory,
+    PoolEntity as Pool,
+    TokenEntity as Token,
+    BundleEntity as Bundle,
 } from '../generated/src/Types.gen'
 import { ZERO_BD, ZERO_BI } from './constants'
 import { addressToDex } from './utils/addressToDex'
-import { getPoolAddressToInfo } from './utils/getPoolAddressToInfo'
 
-// event event PoolCreated(address indexed pool, address indexed token0, address indexed token1, uint24 fee, int24 tickSpacing)
+import { getOrCreateToken_async } from './helpers'
+
+import { ethereumSushiswapConfig } from './config'
+
+// PoolCreated(address indexed pool, address indexed token0, address indexed token1, uint24 fee, int24 tickSpacing)
 FactoryContract_PoolCreated_loader(({ event, context }) => {
-    let factoryAddress = event.srcAddress
-    context.Factory.load(factoryAddress)
     // used to register dynamic contracts ie. contracts that are registered at runtime
     context.contractRegistration.addPool(event.params.pool)
 })
 
-FactoryContract_PoolCreated_handler(({ event, context }) => {
-    let factoryAddress = event.srcAddress
-    let factory = context.Factory.get(factoryAddress)
+FactoryContract_PoolCreated_handlerAsync(async ({ event, context }) => {
+    let factoryAddress = event.srcAddress.toLowerCase()
+    let factory = await context.Factory.get(factoryAddress)
 
-    const poolInfo = getPoolAddressToInfo(event.params.pool)
-
-    if (!poolInfo) {
-        context.log.info('no pool info for ' + event.params.pool)
-        return
-    }
-
-    const dexKey = poolInfo.dexKey
+    const dexKey = addressToDex(factoryAddress)
 
     if (factory == null) {
-        let factoryObject: FactoryEntity = {
+        let updatedFactory: Factory = {
             id: factoryAddress,
-            poolCount: 0n,
-            dexKey: addressToDex(event.srcAddress),
+            address: factoryAddress,
+            poolCount: 0,
+            dexKey: dexKey,
+            chainId: event.chainId,
+            totalVolumeETH: ZERO_BD,
+            totalVolumeUSD: ZERO_BD,
+            untrackedVolumeUSD: ZERO_BD,
+            totalFeesUSD: ZERO_BD,
+            totalFeesETH: ZERO_BD,
+            totalValueLockedETH: ZERO_BD,
+            totalValueLockedUSD: ZERO_BD,
+            totalValueLockedUSDUntracked: ZERO_BD,
+            totalValueLockedETHUntracked: ZERO_BD,
+            txCount: 0,
+            pools: [event.params.pool],
+            owner: event.txOrigin ? event.txOrigin?.toString() : 'unknown', // the owner is the deployer initially
         }
-        context.Factory.set(factoryObject)
 
-        let bundleObject = {
-            id: '1',
-            ethPriceUSD: ZERO_BD,
+        await context.Factory.set(updatedFactory)
+
+        let updatedBundle: Bundle = {
+            id: event.chainId.toString(),
+            nativeTokenPriceUSD: ZERO_BD,
         }
-        context.Bundle.set(bundleObject)
+
+        await context.Bundle.set(updatedBundle)
     } else {
-        let factoryObject: FactoryEntity = {
+        let updatedFactory: Factory = {
             ...factory,
-            poolCount: factory.poolCount + 1n,
+            poolCount: factory.poolCount + 1,
+            pools: [...factory.pools, event.params.pool],
         }
 
-        context.Factory.set(factoryObject)
+        await context.Factory.set(updatedFactory)
     }
-
-    // let decimals = 6n; //fetchTokenDecimals(event.params.token0);
-    // bail if we couldn't figure out the decimals
-    // if (decimals === null) {
-    //   context.log.info("mybug the decimal on token 0 was null");
-    //   return;
-    // }
 
     // create tokens
-    let token0Object: TokenEntity = {
-        id: event.params.token0.toLowerCase(),
-        symbol: poolInfo.token0.symbol, //fetchTokenSymbol(event.params.token0),
-        name: poolInfo.token0.name, //fetchTokenName(event.params.token0),
-        totalSupply: BigInt(poolInfo.token0.totalSupply), //fetchTokenTotalSupply(event.params.token0),
-        decimals: BigInt(poolInfo.token0.decimals),
-        derivedETH: ZERO_BD,
-        volume: ZERO_BD,
-        volumeUSD: ZERO_BD,
-        feesUSD: ZERO_BD,
-        untrackedVolumeUSD: ZERO_BD,
-        totalValueLocked: ZERO_BD,
-        totalValueLockedUSD: ZERO_BD,
-        totalValueLockedUSDUntracked: ZERO_BD,
-        txCount: ZERO_BI,
-        poolCount: ZERO_BI,
-    }
-    context.Token.set(token0Object)
+    let token0: Token = await getOrCreateToken_async(
+        event,
+        event.params.token0,
+        context.Token.get,
+    )
 
-    let token1Object: TokenEntity = {
-        id: event.params.token1.toLowerCase(),
-        symbol: poolInfo.token1.symbol, //fetchTokenSymbol(event.params.token0),
-        name: poolInfo.token1.name, //fetchTokenName(event.params.token0),
-        totalSupply: BigInt(poolInfo.token1.totalSupply), //fetchTokenTotalSupply(event.params.token0),
-        decimals: BigInt(poolInfo.token1.decimals),
-        derivedETH: ZERO_BD,
-        volume: ZERO_BD,
-        volumeUSD: ZERO_BD,
-        feesUSD: ZERO_BD,
-        untrackedVolumeUSD: ZERO_BD,
-        totalValueLocked: ZERO_BD,
-        totalValueLockedUSD: ZERO_BD,
-        totalValueLockedUSDUntracked: ZERO_BD,
-        txCount: ZERO_BI,
-        poolCount: ZERO_BI,
-    }
-    context.Token.set(token1Object)
+    let token1: Token = await getOrCreateToken_async(
+        event,
+        event.params.token1,
+        context.Token.get,
+    )
 
-    let poolObject: PoolEntity = {
-        id: event.params.pool,
+    let pool: Pool = {
+        id: event.params.pool.toLowerCase(),
         createdAtTimestamp: BigInt(event.blockTimestamp), // can see this list of available properties here https://docs.envio.dev/docs/event-handlers
         tick: ZERO_BI,
         dexKey: dexKey,
-        token0: token0Object.id,
-        token1: token1Object.id,
-        feeTier: BigInt(event.params.fee), //BigInt.fromI32(event.params.fee),
+        token0_id: event.params.token0.toLowerCase(),
+        token1_id: event.params.token1.toLowerCase(),
+        feeTier: BigInt(event.params.fee),
         createdAtBlockNumber: BigInt(event.blockNumber),
         liquidityProviderCount: ZERO_BI,
-        txCount: ZERO_BI,
+        txCount: 0,
         sqrtPrice: ZERO_BI,
         liquidity: ZERO_BI,
         feeGrowthGlobal0X128: ZERO_BI,
@@ -129,16 +110,63 @@ FactoryContract_PoolCreated_handler(({ event, context }) => {
         volumeUSD: ZERO_BD,
         feesUSD: ZERO_BD,
         untrackedVolumeUSD: ZERO_BD,
-
         collectedFeesToken0: ZERO_BD,
         collectedFeesToken1: ZERO_BD,
         collectedFeesUSD: ZERO_BD,
+        factory_id: factoryAddress,
     }
 
-    // poolToToken[event.params.pool] = {
-    //   token0: token0Object.id,
-    //   token1: token1Object.id,
-    // };
+    await context.Pool.set(pool)
 
-    context.Pool.set(poolObject)
+    // update white listed pools
+    if (
+        ethereumSushiswapConfig.whitelistedTokenAddresses.includes(
+            token0.id.toLowerCase(),
+        )
+    ) {
+        let newPools = token1.whitelistPools
+        newPools.push(pool.id)
+        token1 = {
+            ...token1,
+            whitelistPools: newPools,
+        }
+    }
+
+    // update white listed pools
+    if (
+        ethereumSushiswapConfig.whitelistedTokenAddresses.includes(
+            token1.id.toLowerCase(),
+        )
+    ) {
+        let newPools = token0.whitelistPools
+        newPools.push(pool.id)
+        token0 = {
+            ...token0,
+            whitelistPools: newPools,
+        }
+    }
+
+    await context.Token.set(token0)
+
+    await context.Token.set(token1)
+})
+
+// OwnerChanged(address indexed oldOwner, address indexed newOwner)
+FactoryContract_OwnerChanged_loader(({ event, context }) => {
+    let factoryAddress = event.srcAddress.toLowerCase()
+    context.Factory.load(factoryAddress)
+})
+
+FactoryContract_OwnerChanged_handler(({ event, context }) => {
+    let factoryAddress = event.srcAddress.toLowerCase()
+    let factory = context.Factory.get(factoryAddress)
+
+    if (factory) {
+        let updatedFactory: Factory = {
+            ...factory,
+            owner: event.params.newOwner.toLowerCase(),
+        }
+
+        context.Factory.set(updatedFactory)
+    }
 })
