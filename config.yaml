@@ -6,7 +6,6 @@ contracts:
     events:
       - event: "PoolCreated(address indexed token0, address indexed token1, uint24 indexed fee, int24 tickSpacing, address pool)"
         isAsync: true
-      - event: "OwnerChanged(address indexed oldOwner, address indexed newOwner)"
   - name: Pool
     handler: src/PoolEventHandlers.ts
     events:
@@ -16,8 +15,8 @@ contracts:
         isAsync: true
       - event: "Burn(address indexed owner, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount, uint256 amount0, uint256 amount1)"
         isAsync: true
-      - event: "Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)"
-        isAsync: true
+      # - event: "Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)"
+      #   isAsync: true
 networks:
   - id: 1 # Ethereum
     start_block: 0
@@ -27,7 +26,7 @@ networks:
           # - "0x1F98431c8aD98523631AE4a59f267346ea31F984" # uniswap
           # - "0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865" # pancakeswap
           - "0xbaceb8ec6b9355dfc0269c18bac9d6e2bdc29c4f" # sushi
-      - name: Pool
+      # - name: Pool
   # - id: 137 # Polygon
   #   start_block: 41024971 # The deployment block https://polygonscan.com/address/0x917933899c6a5F8E37F31E19f92CdBFF7e8FF0e2
   #   contracts:

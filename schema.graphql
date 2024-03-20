@@ -158,3 +158,18 @@ type Pool @entity {
     # collects: [Collect!]! @derivedFrom(field: "pool")
     # ticks: [Tick!]! @derivedFrom(field: "pool")
 }
+
+type Tick @entity {
+    # format: <pool address>#<tick index>
+    id: ID!
+    # pool address
+    poolAddress: String
+    # tick index
+    tickIdx: BigInt!
+    # how much liquidity changes when tick crossed
+    liquidityNet: BigInt!
+    # calculated price of token0 of tick within this pool - constant
+    price0: String!
+    # calculated price of token1 of tick within this pool - constant
+    price1: String!
+}

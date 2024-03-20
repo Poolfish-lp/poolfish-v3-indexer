@@ -9,6 +9,7 @@ import {
     PoolEntity as Pool,
     TokenEntity as Token,
     FactoryEntity as Factory,
+    TickEntity as Tick,
 } from '../generated/src/Types.gen'
 import { NATIVE_PRICE_POOL, ONE_BI, ZERO_BD, ZERO_BI } from './constants' // todo: generalize native price pool
 import {
@@ -33,6 +34,8 @@ import {
     getFactory_async,
     getToken_async,
 } from './helpers'
+import { createTick } from './utils/tick'
+import bigInt from 'big-integer'
 
 // Initialize(uint160 sqrtPriceX96, int24 tick)
 PoolContract_Initialize_handlerAsync(async ({ event, context }) => {
@@ -185,26 +188,26 @@ PoolContract_Mint_handlerAsync(async ({ event, context }) => {
         poolLiquidity = BigInt(pool.liquidity) + BigInt(event.params.amount)
     }
 
-    let updatedPool: Pool = {
-        ...pool,
-        liquidity: poolLiquidity,
-        txCount: pool.txCount + 1,
-        totalValueLockedToken0: new Big(pool.totalValueLockedToken0)
-            .plus(amount0)
-            .toString(),
-        totalValueLockedToken1: new Big(pool.totalValueLockedToken1)
-            .plus(amount1)
-            .toString(),
-        totalValueLockedETH: new Big(pool.totalValueLockedToken0)
-            .times(token0.derivedETH)
-            .plus(new Big(pool.totalValueLockedToken1).times(token1.derivedETH))
-            .toString(),
-        totalValueLockedUSD: new Big(pool.totalValueLockedETH)
-            .times(bundle.nativeTokenPriceUSD)
-            .toString(),
-    }
+    // let updatedPool: Pool = {
+    //     ...pool,
+    //     liquidity: poolLiquidity,
+    //     txCount: pool.txCount + 1,
+    //     totalValueLockedToken0: new Big(pool.totalValueLockedToken0)
+    //         .plus(amount0)
+    //         .toString(),
+    //     totalValueLockedToken1: new Big(pool.totalValueLockedToken1)
+    //         .plus(amount1)
+    //         .toString(),
+    //     totalValueLockedETH: new Big(pool.totalValueLockedToken0)
+    //         .times(token0.derivedETH)
+    //         .plus(new Big(pool.totalValueLockedToken1).times(token1.derivedETH))
+    //         .toString(),
+    //     totalValueLockedUSD: new Big(pool.totalValueLockedETH)
+    //         .times(bundle.nativeTokenPriceUSD)
+    //         .toString(),
+    // }
 
-    context.Pool.set(updatedPool)
+    // context.Pool.set(updatedPool)
 
     // todo: remainder of mint
     //   let transaction = loadTransaction(event)
@@ -226,28 +229,32 @@ PoolContract_Mint_handlerAsync(async ({ event, context }) => {
     //   mint.logIndex = event.logIndex
 
     //   // tick entities
-    //   let lowerTickIdx = event.params.tickLower
-    //   let upperTickIdx = event.params.tickUpper
+      let lowerTickIdx = event.params.tickLower
+      let upperTickIdx = event.params.tickUpper
 
-    //   let lowerTickId = poolAddress + '#' + BigInt.fromI32(event.params.tickLower).toString()
-    //   let upperTickId = poolAddress + '#' + BigInt.fromI32(event.params.tickUpper).toString()
+      let lowerTickId = pool.id + '#' + bigInt(event.params.tickLower).toString()
+      let upperTickId = pool.id + '#' + bigInt(event.params.tickUpper).toString()
 
     //   let lowerTick = Tick.load(lowerTickId)
-    //   let upperTick = Tick.load(upperTickId)
+      let lowerTick = await getTick_async(lowerTickId)
+      let upperTick = await getTick_async(upperTickId)
 
-    //   if (lowerTick === null) {
-    //     lowerTick = createTick(lowerTickId, lowerTickIdx, pool.id, event)
-    //   }
+      if (lowerTick === null) {
+        lowerTick = createTick(lowerTickId, lowerTickIdx, pool.id, event)
+      }
 
-    //   if (upperTick === null) {
-    //     upperTick = createTick(upperTickId, upperTickIdx, pool.id, event)
-    //   }
+      if (upperTick === null) {
+        upperTick = createTick(upperTickId, upperTickIdx, pool.id, event)
+      }
 
-    //   let amount = event.params.amount
+      let amount = event.params.amount
     //   lowerTick.liquidityGross = lowerTick.liquidityGross.plus(amount)
-    //   lowerTick.liquidityNet = lowerTick.liquidityNet.plus(amount)
+      lowerTick.liquidityNet = lowerTick.liquidityNet.plus(amount)
     //   upperTick.liquidityGross = upperTick.liquidityGross.plus(amount)
-    //   upperTick.liquidityNet = upperTick.liquidityNet.minus(amount)
+      upperTick.liquidityNet = upperTick.liquidityNet.minus(amount)
+
+      lowerTick.save()
+      upperTick.save()
 
     //   // TODO: Update Tick's volume, fees, and liquidity provider count. Computing these on the tick
     //   // level requires reimplementing some of the swapping code from v3-core.
@@ -273,14 +280,14 @@ PoolContract_Burn_handlerAsync(async ({ event, context }) => {
         event.srcAddress.toLowerCase(),
         context.Pool.get,
     )
-    let bundle = await getBundle_async(
-        event.chainId.toString(),
-        context.Bundle.get,
-    )
-    let factory = await getFactory_async(pool.factory_id, context.Factory.get)
+    // let bundle = await getBundle_async(
+    //     event.chainId.toString(),
+    //     context.Bundle.get,
+    // )
+    // let factory = await getFactory_async(pool.factory_id, context.Factory.get)
 
-    let token0 = await getToken_async(pool.token0_id, context.Token.get)
-    let token1 = await getToken_async(pool.token1_id, context.Token.get)
+    // let token0 = await getToken_async(pool.token0_id, context.Token.get)
+    // let token1 = await getToken_async(pool.token1_id, context.Token.get)
 
     let amount0 = convertTokenToDecimal(event.params.amount0, token0?.decimals)
     let amount1 = convertTokenToDecimal(event.params.amount1, token1?.decimals)
@@ -294,75 +301,75 @@ PoolContract_Burn_handlerAsync(async ({ event, context }) => {
         )
 
     // update token0 data
-    let updatedToken0: Token = {
-        ...token0,
-        txCount: BigInt(BigInt(token0.txCount) + ONE_BI),
-        totalValueLocked: new Big(token0.totalValueLocked)
-            .minus(amount0)
-            .toString(),
-        totalValueLockedUSD: new Big(token0.totalValueLocked)
-            .times(new Big(token0.derivedETH).times(bundle.nativeTokenPriceUSD))
-            .toString(),
-    }
-    context.Token.set(updatedToken0)
+    // let updatedToken0: Token = {
+    //     ...token0,
+    //     txCount: BigInt(BigInt(token0.txCount) + ONE_BI),
+    //     totalValueLocked: new Big(token0.totalValueLocked)
+    //         .minus(amount0)
+    //         .toString(),
+    //     totalValueLockedUSD: new Big(token0.totalValueLocked)
+    //         .times(new Big(token0.derivedETH).times(bundle.nativeTokenPriceUSD))
+    //         .toString(),
+    // }
+    // context.Token.set(updatedToken0)
 
-    // update token1 data
-    let updatedToken1: Token = {
-        ...token0,
-        txCount: BigInt(BigInt(token0.txCount) + ONE_BI),
-        totalValueLocked: new Big(token1.totalValueLocked)
-            .minus(amount1)
-            .toString(),
-        totalValueLockedUSD: new Big(token1.totalValueLocked)
-            .times(new Big(token1.derivedETH).times(bundle.nativeTokenPriceUSD))
-            .toString(),
-    }
-    context.Token.set(updatedToken1)
+    // // update token1 data
+    // let updatedToken1: Token = {
+    //     ...token0,
+    //     txCount: BigInt(BigInt(token0.txCount) + ONE_BI),
+    //     totalValueLocked: new Big(token1.totalValueLocked)
+    //         .minus(amount1)
+    //         .toString(),
+    //     totalValueLockedUSD: new Big(token1.totalValueLocked)
+    //         .times(new Big(token1.derivedETH).times(bundle.nativeTokenPriceUSD))
+    //         .toString(),
+    // }
+    // context.Token.set(updatedToken1)
 
     // Pools liquidity tracks the currently active liquidity given pools current tick.
     // We only want to update it on mint if the new position includes the current tick.
-    let poolLiquidity = pool.liquidity
+    // let poolLiquidity = pool.liquidity
 
-    if (
-        pool.tick &&
-        BigInt(event.params.tickLower) <= BigInt(pool.tick) &&
-        BigInt(event.params.tickUpper) > BigInt(pool.tick)
-    ) {
-        poolLiquidity = BigInt(pool.liquidity) - BigInt(event.params.amount)
-    }
+    // if (
+    //     pool.tick &&
+    //     BigInt(event.params.tickLower) <= BigInt(pool.tick) &&
+    //     BigInt(event.params.tickUpper) > BigInt(pool.tick)
+    // ) {
+    //     poolLiquidity = BigInt(pool.liquidity) - BigInt(event.params.amount)
+    // }
 
-    let updatedPool: Pool = {
-        ...pool,
-        liquidity: poolLiquidity,
-        txCount: pool.txCount + 1,
-        totalValueLockedToken0: new Big(pool.totalValueLockedToken0)
-            .minus(amount0)
-            .toString(),
-        totalValueLockedToken1: new Big(pool.totalValueLockedToken1)
-            .minus(amount1)
-            .toString(),
-        totalValueLockedETH: new Big(pool.totalValueLockedToken0)
-            .times(token0.derivedETH)
-            .plus(new Big(pool.totalValueLockedToken1).times(token1.derivedETH))
-            .toString(),
-        totalValueLockedUSD: new Big(pool.totalValueLockedETH)
-            .times(bundle.nativeTokenPriceUSD)
-            .toString(),
-    }
-    context.Pool.set(updatedPool)
+    // let updatedPool: Pool = {
+    //     ...pool,
+    //     liquidity: poolLiquidity,
+    //     txCount: pool.txCount + 1,
+    //     totalValueLockedToken0: new Big(pool.totalValueLockedToken0)
+    //         .minus(amount0)
+    //         .toString(),
+    //     totalValueLockedToken1: new Big(pool.totalValueLockedToken1)
+    //         .minus(amount1)
+    //         .toString(),
+    //     totalValueLockedETH: new Big(pool.totalValueLockedToken0)
+    //         .times(token0.derivedETH)
+    //         .plus(new Big(pool.totalValueLockedToken1).times(token1.derivedETH))
+    //         .toString(),
+    //     totalValueLockedUSD: new Big(pool.totalValueLockedETH)
+    //         .times(bundle.nativeTokenPriceUSD)
+    //         .toString(),
+    // }
+    // context.Pool.set(updatedPool)
 
-    const updatedFactory: Factory = {
-        ...factory,
-        totalValueLockedETH: new Big(factory.totalValueLockedETH)
-            .minus(updatedPool.totalValueLockedETH)
-            .toString(), // reset tvl aggregates until new amounts calculated
-        txCount: factory.txCount + 1, // update globals
-        totalValueLockedUSD: new Big(factory.totalValueLockedETH)
-            .times(bundle.nativeTokenPriceUSD)
-            .toString(), // reset aggregates with new amounts
-    }
+    // const updatedFactory: Factory = {
+    //     ...factory,
+    //     totalValueLockedETH: new Big(factory.totalValueLockedETH)
+    //         .minus(updatedPool.totalValueLockedETH)
+    //         .toString(), // reset tvl aggregates until new amounts calculated
+    //     txCount: factory.txCount + 1, // update globals
+    //     totalValueLockedUSD: new Big(factory.totalValueLockedETH)
+    //         .times(bundle.nativeTokenPriceUSD)
+    //         .toString(), // reset aggregates with new amounts
+    // }
 
-    await context.Factory.set(updatedFactory)
+    // await context.Factory.set(updatedFactory)
 
     // todo: burn tx entity & tick entities & interval entities
     //   let transaction = loadTransaction(event)
@@ -382,16 +389,21 @@ PoolContract_Burn_handlerAsync(async ({ event, context }) => {
     //   burn.tickUpper = BigInt.fromI32(event.params.tickUpper)
     //   burn.logIndex = event.logIndex
 
-    //   // tick entities
-    //   let lowerTickId = poolAddress + '#' + BigInt.fromI32(event.params.tickLower).toString()
-    //   let upperTickId = poolAddress + '#' + BigInt.fromI32(event.params.tickUpper).toString()
-    //   let lowerTick = Tick.load(lowerTickId)
-    //   let upperTick = Tick.load(upperTickId)
-    //   let amount = event.params.amount
-    //   lowerTick.liquidityGross = lowerTick.liquidityGross.minus(amount)
-    //   lowerTick.liquidityNet = lowerTick.liquidityNet.minus(amount)
-    //   upperTick.liquidityGross = upperTick.liquidityGross.minus(amount)
-    //   upperTick.liquidityNet = upperTick.liquidityNet.plus(amount)
+    // tick entities
+    let lowerTickId =
+        poolAddress + '#' + bigInt(event.params.tickLower).toString()
+    let upperTickId =
+        poolAddress + '#' + bigInt(event.params.tickUpper).toString()
+    let lowerTick = Tick.load(lowerTickId)
+    let upperTick = Tick.load(upperTickId)
+    let amount = event.params.amount
+    lowerTick.liquidityGross = lowerTick.liquidityGross.minus(amount)
+    lowerTick.liquidityNet = lowerTick.liquidityNet.minus(amount)
+    upperTick.liquidityGross = upperTick.liquidityGross.minus(amount)
+    upperTick.liquidityNet = upperTick.liquidityNet.plus(amount)
+
+    lowerTick.save()
+      upperTick.save()
 
     //   updateUniswapDayData(event)
     //   updatePoolDayData(event)
@@ -405,166 +417,166 @@ PoolContract_Burn_handlerAsync(async ({ event, context }) => {
 })
 
 // todo: debug whats breaking with swap
-PoolContract_Swap_handlerAsync(async ({ event, context }) => {
-    let pool = await getPool_async(
-        event.srcAddress.toLowerCase(),
-        context.Pool.get,
-    )
-    let bundle = await getBundle_async(
-        event.chainId.toString(),
-        context.Bundle.get,
-    )
-    let factory = await getFactory_async(pool.factory_id, context.Factory.get)
+// PoolContract_Swap_handlerAsync(async ({ event, context }) => {
+//     let pool = await getPool_async(
+//         event.srcAddress.toLowerCase(),
+//         context.Pool.get,
+//     )
+//     let bundle = await getBundle_async(
+//         event.chainId.toString(),
+//         context.Bundle.get,
+//     )
+//     let factory = await getFactory_async(pool.factory_id, context.Factory.get)
 
-    let token0 = await getToken_async(pool.token0_id, context.Token.get)
-    let token1 = await getToken_async(pool.token1_id, context.Token.get)
+//     let token0 = await getToken_async(pool.token0_id, context.Token.get)
+//     let token1 = await getToken_async(pool.token1_id, context.Token.get)
 
-    // amounts - 0/1 are token deltas: can be positive or negative
-    let amount0 = convertTokenToDecimal(event.params.amount0, token0.decimals)
-    let amount1 = convertTokenToDecimal(event.params.amount1, token1.decimals)
+//     // amounts - 0/1 are token deltas: can be positive or negative
+//     let amount0 = convertTokenToDecimal(event.params.amount0, token0.decimals)
+//     let amount1 = convertTokenToDecimal(event.params.amount1, token1.decimals)
 
-    // need absolute amounts for volume
-    let amount0Abs = amount0
-    if (amount0.lt(ZERO_BD)) {
-        amount0Abs = amount0.times(new Big('-1'))
-    }
-    let amount1Abs = amount1
-    if (amount1.lt(ZERO_BD)) {
-        amount1Abs = amount1.times(new Big('-1'))
-    }
+//     // need absolute amounts for volume
+//     let amount0Abs = amount0
+//     if (amount0.lt(ZERO_BD)) {
+//         amount0Abs = amount0.times(new Big('-1'))
+//     }
+//     let amount1Abs = amount1
+//     if (amount1.lt(ZERO_BD)) {
+//         amount1Abs = amount1.times(new Big('-1'))
+//     }
 
-    let amount0ETH = amount0Abs.times(token0.derivedETH)
-    let amount1ETH = amount1Abs.times(token1.derivedETH)
+//     let amount0ETH = amount0Abs.times(token0.derivedETH)
+//     let amount1ETH = amount1Abs.times(token1.derivedETH)
 
-    let amount0USD = amount0ETH.times(bundle.nativeTokenPriceUSD)
-    let amount1USD = amount1ETH.times(bundle.nativeTokenPriceUSD)
+//     let amount0USD = amount0ETH.times(bundle.nativeTokenPriceUSD)
+//     let amount1USD = amount1ETH.times(bundle.nativeTokenPriceUSD)
 
-    let amountTotalUSDTracked = safeDiv(
-        getTrackedAmountUSD(amount0Abs, token0, amount1Abs, token1, bundle),
-        new Big('2'),
-    )
+//     let amountTotalUSDTracked = safeDiv(
+//         getTrackedAmountUSD(amount0Abs, token0, amount1Abs, token1, bundle),
+//         new Big('2'),
+//     )
 
-    let amountTotalETHTracked = safeDiv(
-        amountTotalUSDTracked,
-        new Big(bundle.nativeTokenPriceUSD),
-    )
+//     let amountTotalETHTracked = safeDiv(
+//         amountTotalUSDTracked,
+//         new Big(bundle.nativeTokenPriceUSD),
+//     )
 
-    let amountTotalUSDUntracked = safeDiv(
-        amount0USD.plus(amount1USD),
-        new Big('2'),
-    )
+//     let amountTotalUSDUntracked = safeDiv(
+//         amount0USD.plus(amount1USD),
+//         new Big('2'),
+//     )
 
-    let feesETH = amountTotalETHTracked
-        .times(new Big(pool.feeTier.toString()))
-        .div(new Big('1000000'))
-    let feesUSD = amountTotalUSDTracked
-        .times(new Big(pool.feeTier.toString()))
-        .div(new Big('1000000'))
+//     let feesETH = amountTotalETHTracked
+//         .times(new Big(pool.feeTier.toString()))
+//         .div(new Big('1000000'))
+//     let feesUSD = amountTotalUSDTracked
+//         .times(new Big(pool.feeTier.toString()))
+//         .div(new Big('1000000'))
 
-    // pool volume and rates
-    let prices = sqrtPriceX96ToTokenPrices(pool.sqrtPrice, token0, token1)
-    let updatedPool: Pool = {
-        ...pool,
-        volumeToken0: new Big(pool.volumeToken0).plus(amount0Abs).toString(),
-        volumeToken1: new Big(pool.volumeToken1).plus(amount1Abs).toString(),
-        volumeUSD: new Big(pool.volumeUSD)
-            .plus(amountTotalUSDTracked)
-            .toString(),
-        untrackedVolumeUSD: new Big(pool.untrackedVolumeUSD)
-            .plus(amountTotalUSDUntracked)
-            .toString(),
-        feesUSD: new Big(pool.feesUSD).plus(feesUSD).toString(),
-        txCount: pool.txCount + 1,
+//     // pool volume and rates
+//     let prices = sqrtPriceX96ToTokenPrices(pool.sqrtPrice, token0, token1)
+//     let updatedPool: Pool = {
+//         ...pool,
+//         volumeToken0: new Big(pool.volumeToken0).plus(amount0Abs).toString(),
+//         volumeToken1: new Big(pool.volumeToken1).plus(amount1Abs).toString(),
+//         volumeUSD: new Big(pool.volumeUSD)
+//             .plus(amountTotalUSDTracked)
+//             .toString(),
+//         untrackedVolumeUSD: new Big(pool.untrackedVolumeUSD)
+//             .plus(amountTotalUSDUntracked)
+//             .toString(),
+//         feesUSD: new Big(pool.feesUSD).plus(feesUSD).toString(),
+//         txCount: pool.txCount + 1,
 
-        // Update the pool with the new active liquidity, price, and tick.
-        liquidity: event.params.liquidity,
-        tick: event.params.tick,
-        sqrtPrice: event.params.sqrtPriceX96,
-        totalValueLockedToken0: new Big(pool.totalValueLockedToken0)
-            .plus(amount0)
-            .toString(),
-        totalValueLockedToken1: new Big(pool.totalValueLockedToken1)
-            .plus(amount1)
-            .toString(),
-        token0Price: prices[0].toString(),
-        token1Price: prices[1].toString(),
-        feeGrowthGlobal0X128: BigInt(
-            (await getFeeGrowthGlobal0X128(pool.id as Hash)).toString(),
-        ),
-        feeGrowthGlobal1X128: BigInt(
-            (await getFeeGrowthGlobal1X128(pool.id as Hash)).toString(),
-        ),
-    }
+//         // Update the pool with the new active liquidity, price, and tick.
+//         liquidity: event.params.liquidity,
+//         tick: event.params.tick,
+//         sqrtPrice: event.params.sqrtPriceX96,
+//         totalValueLockedToken0: new Big(pool.totalValueLockedToken0)
+//             .plus(amount0)
+//             .toString(),
+//         totalValueLockedToken1: new Big(pool.totalValueLockedToken1)
+//             .plus(amount1)
+//             .toString(),
+//         token0Price: prices[0].toString(),
+//         token1Price: prices[1].toString(),
+//         feeGrowthGlobal0X128: BigInt(
+//             (await getFeeGrowthGlobal0X128(pool.id as Hash)).toString(),
+//         ),
+//         feeGrowthGlobal1X128: BigInt(
+//             (await getFeeGrowthGlobal1X128(pool.id as Hash)).toString(),
+//         ),
+//     }
 
-    context.Pool.set(updatedPool)
+//     context.Pool.set(updatedPool)
 
-    let updatedFactory: Factory = {
-        ...factory,
-        txCount: factory.txCount + 1,
-        totalVolumeETH: new Big(factory.totalVolumeETH)
-            .plus(amountTotalETHTracked)
-            .toString(),
-        totalVolumeUSD: new Big(factory.totalVolumeUSD)
-            .plus(amountTotalUSDTracked)
-            .toString(),
-        untrackedVolumeUSD: new Big(factory.untrackedVolumeUSD)
-            .plus(amountTotalUSDUntracked)
-            .toString(),
-        totalFeesETH: new Big(factory.totalFeesETH).plus(feesETH).toString(),
-        totalFeesUSD: new Big(factory.totalFeesUSD).plus(feesUSD).toString(),
-        // reset aggregate tvl before individual pool tvl updates
-        totalValueLockedETH: new Big(factory.totalValueLockedETH)
-            .minus(updatedPool.totalValueLockedETH)
-            .toString(),
+//     let updatedFactory: Factory = {
+//         ...factory,
+//         txCount: factory.txCount + 1,
+//         totalVolumeETH: new Big(factory.totalVolumeETH)
+//             .plus(amountTotalETHTracked)
+//             .toString(),
+//         totalVolumeUSD: new Big(factory.totalVolumeUSD)
+//             .plus(amountTotalUSDTracked)
+//             .toString(),
+//         untrackedVolumeUSD: new Big(factory.untrackedVolumeUSD)
+//             .plus(amountTotalUSDUntracked)
+//             .toString(),
+//         totalFeesETH: new Big(factory.totalFeesETH).plus(feesETH).toString(),
+//         totalFeesUSD: new Big(factory.totalFeesUSD).plus(feesUSD).toString(),
+//         // reset aggregate tvl before individual pool tvl updates
+//         totalValueLockedETH: new Big(factory.totalValueLockedETH)
+//             .minus(updatedPool.totalValueLockedETH)
+//             .toString(),
 
-        totalValueLockedUSD: new Big(factory.totalValueLockedETH)
-            .times(bundle.nativeTokenPriceUSD)
-            .toString(),
-    }
+//         totalValueLockedUSD: new Big(factory.totalValueLockedETH)
+//             .times(bundle.nativeTokenPriceUSD)
+//             .toString(),
+//     }
 
-    context.Factory.set(updatedFactory)
+//     context.Factory.set(updatedFactory)
 
-    let updatedToken0: Token = {
-        ...token0,
-        volume: new Big(token0.volume).plus(amount0Abs).toString(),
-        totalValueLocked: new Big(token0.totalValueLocked)
-            .plus(amount0)
-            .toString(),
-        volumeUSD: new Big(token0.volumeUSD)
-            .plus(amountTotalUSDTracked)
-            .toString(),
-        untrackedVolumeUSD: new Big(token0.untrackedVolumeUSD)
-            .plus(amountTotalUSDUntracked)
-            .toString(),
-        feesUSD: new Big(token0.feesUSD).plus(feesUSD).toString(),
-        txCount: BigInt(token0.txCount) + ONE_BI,
-    }
-    context.Token.set(updatedToken0)
+//     let updatedToken0: Token = {
+//         ...token0,
+//         volume: new Big(token0.volume).plus(amount0Abs).toString(),
+//         totalValueLocked: new Big(token0.totalValueLocked)
+//             .plus(amount0)
+//             .toString(),
+//         volumeUSD: new Big(token0.volumeUSD)
+//             .plus(amountTotalUSDTracked)
+//             .toString(),
+//         untrackedVolumeUSD: new Big(token0.untrackedVolumeUSD)
+//             .plus(amountTotalUSDUntracked)
+//             .toString(),
+//         feesUSD: new Big(token0.feesUSD).plus(feesUSD).toString(),
+//         txCount: BigInt(token0.txCount) + ONE_BI,
+//     }
+//     context.Token.set(updatedToken0)
 
-    // update token1 data
-    let updatedToken1: Token = {
-        ...token0,
-        volume: new Big(token1.volume).plus(amount1Abs).toString(),
-        totalValueLocked: new Big(token1.totalValueLocked)
-            .plus(amount1)
-            .toString(),
-        volumeUSD: new Big(token1.volumeUSD)
-            .plus(amountTotalUSDTracked)
-            .toString(),
-        untrackedVolumeUSD: new Big(token1.untrackedVolumeUSD)
-            .plus(amountTotalUSDUntracked)
-            .toString(),
-        feesUSD: new Big(token1.feesUSD).plus(feesUSD).toString(),
-        txCount: BigInt(token0.txCount) + ONE_BI,
-    }
-    context.Token.set(updatedToken1)
+//     // update token1 data
+//     let updatedToken1: Token = {
+//         ...token0,
+//         volume: new Big(token1.volume).plus(amount1Abs).toString(),
+//         totalValueLocked: new Big(token1.totalValueLocked)
+//             .plus(amount1)
+//             .toString(),
+//         volumeUSD: new Big(token1.volumeUSD)
+//             .plus(amountTotalUSDTracked)
+//             .toString(),
+//         untrackedVolumeUSD: new Big(token1.untrackedVolumeUSD)
+//             .plus(amountTotalUSDUntracked)
+//             .toString(),
+//         feesUSD: new Big(token1.feesUSD).plus(feesUSD).toString(),
+//         txCount: BigInt(token0.txCount) + ONE_BI,
+//     }
+//     context.Token.set(updatedToken1)
 
-    // update USD pricing
-    let updatedBundle = {
-        id: event.chainId.toString(),
-        nativeTokenPriceUSD: getNativeTokenPriceInUSD(updatedPool),
-    }
-    context.Bundle.set(updatedBundle)
+//     // update USD pricing
+//     let updatedBundle = {
+//         id: event.chainId.toString(),
+//         nativeTokenPriceUSD: getNativeTokenPriceInUSD(updatedPool),
+//     }
+//     context.Bundle.set(updatedBundle)
 
     // todo: swap tx entity & ticks & interval entities
 

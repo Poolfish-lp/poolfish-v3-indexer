@@ -152,21 +152,21 @@ FactoryContract_PoolCreated_handlerAsync(async ({ event, context }) => {
 })
 
 // OwnerChanged(address indexed oldOwner, address indexed newOwner)
-FactoryContract_OwnerChanged_loader(({ event, context }) => {
-    let factoryAddress = event.srcAddress.toLowerCase()
-    context.Factory.load(factoryAddress)
-})
+// FactoryContract_OwnerChanged_loader(({ event, context }) => {
+//     let factoryAddress = event.srcAddress.toLowerCase()
+//     context.Factory.load(factoryAddress)
+// })
 
-FactoryContract_OwnerChanged_handler(({ event, context }) => {
-    let factoryAddress = event.srcAddress.toLowerCase()
-    let factory = context.Factory.get(factoryAddress)
+// FactoryContract_OwnerChanged_handler(({ event, context }) => {
+//     let factoryAddress = event.srcAddress.toLowerCase()
+//     let factory = context.Factory.get(factoryAddress)
 
-    if (factory) {
-        let updatedFactory: Factory = {
-            ...factory,
-            owner: event.params.newOwner.toLowerCase(),
-        }
+//     if (factory) {
+//         let updatedFactory: Factory = {
+//             ...factory,
+//             owner: event.params.newOwner.toLowerCase(),
+//         }
 
-        context.Factory.set(updatedFactory)
-    }
-})
+//         context.Factory.set(updatedFactory)
+//     }
+// })
